@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MEDCORE | Sistema Hospitalar</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- PLANO DE FUNDO -->
+  <div class="background"></div>
+
+  <!-- CAMADA ESCURA SOBRE A IMAGEM -->
+  <div class="overlay"></div>
+
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="login-page">
+
+    <div class="login-card">
+
+      <!-- LOGO -->
+      <div class="logo-container">
+
+        <img
+          src="medcore-logo.png"
+          alt="MEDCORE"
+          class="logo"
+          onerror="this.style.display='none';"
+        >
+
+      </div>
+
+
+      <!-- TÍTULO -->
+      <div class="system-title">
+
+        <h1>MEDCORE</h1>
+
+        <p>
+          Sistema Hospitalar
+        </p>
+
+      </div>
+
+
+      <div class="separator"></div>
+
+
+      <!-- LOGIN -->
+      <div class="login-content">
+
+        <h2>Acesso ao sistema</h2>
+
+        <p class="subtitle">
+          Entre com suas credenciais para continuar
+        </p>
+
+
+        <!-- USUÁRIO -->
+        <label for="usuario">
+          Usuário
+        </label>
+
+        <div class="input-group">
+
+          <span class="input-icon">👤</span>
+
+          <input
+            id="usuario"
+            type="text"
+            placeholder="Digite seu usuário"
+            autocomplete="username"
+          >
+
+        </div>
+
+
+        <!-- SENHA -->
+        <label for="senha">
+          Senha
+        </label>
+
+        <div class="input-group">
+
+          <span class="input-icon">🔒</span>
+
+          <input
+            id="senha"
+            type="password"
+            placeholder="Digite sua senha"
+            autocomplete="current-password"
+          >
+
+          <button
+            type="button"
+            class="show-password"
+            onclick="mostrarSenha()"
+          >
+            👁
+          </button>
+
+        </div>
+
+
+        <!-- BOTÃO ENTRAR -->
+        <button
+          class="login-button"
+          onclick="login()"
+        >
+
+          <span>Entrar no sistema</span>
+
+          <span class="arrow">→</span>
+
+        </button>
+
+
+        <!-- SEGURANÇA -->
+        <div class="secure-info">
+
+          <span class="shield">🛡️</span>
+
+          <div>
+            <strong>Ambiente seguro</strong>
+            <small>Seus dados estão protegidos</small>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- RODAPÉ DO CARD -->
+      <div class="card-footer">
+
+        <span>MEDCORE</span>
+
+        <span>•</span>
+
+        <span>Sistema Hospitalar</span>
+
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- RODAPÉ DA PÁGINA -->
+  <footer class="footer">
+
+    <span>
+      © 2026 MEDCORE
+    </span>
+
+    <span>
+      Sistema Hospitalar
+    </span>
+
+    <span>
+      Ambiente seguro
+    </span>
+
+  </footer>
+
+
+  <script>
+
+    function login() {
+
+      const usuario =
+        document.getElementById("usuario").value.trim();
+
+      const senha =
+        document.getElementById("senha").value;
+
+
+      if (!usuario || !senha) {
+
+        alert("Preencha o usuário e a senha.");
+
+        return;
+
+      }
+
+
+      fetch("http://localhost:3000/login", {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          usuario: usuario,
+          senha: senha
+        })
+
+      })
+
+      .then(response => response.json())
+
+      .then(data => {
+
+        if (data.tipo === "triagem") {
+
+          location.href = "triagem.html";
+
+        }
+
+        else if (data.tipo === "medico") {
+
+          location.href = "medico.html";
+
+        }
+
+        else if (data.tipo === "atendimento") {
+
+          location.href = "atendimento.html";
+
+        }
+
+        else {
+
+          alert(
+            data.mensagem ||
+            "Usuário ou senha inválidos."
+          );
+
+        }
+
+      })
+
+      .catch(error => {
+
+        console.error(error);
+
+        alert(
+          "Não foi possível conectar ao servidor."
+        );
+
+      });
+
+    }
+
+
+    /* MOSTRAR / ESCONDER SENHA */
+
+    function mostrarSenha() {
+
+      const senha =
+        document.getElementById("senha");
+
+      const botao =
+        document.querySelector(".show-password");
+
+
+      if (senha.type === "password") {
+
+        senha.type = "text";
+
+        botao.innerText = "🙈";
+
+      }
+
+      else {
+
+        senha.type = "password";
+
+        botao.innerText = "👁";
+
+      }
+
+    }
+
+
+    /* ENTER PARA ENTRAR */
+
+    document.addEventListener(
+      "keydown",
+      function(event) {
+
+        if (event.key === "Enter") {
+
+          login();
+
+        }
+
+      }
+    );
+
+  </script>
+
+</body>
+
+</html>

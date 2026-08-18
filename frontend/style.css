@@ -1,0 +1,654 @@
+/* =========================================
+   RESET
+========================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  overflow: hidden;
+}
+
+
+/* =========================================
+   PLANO DE FUNDO
+========================================= */
+
+.background {
+  position: fixed;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background-image: url("medcore-logo.png");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+
+  transform: scale(1.02);
+
+  z-index: -2;
+}
+
+
+/* =========================================
+   CAMADA ESCURA
+========================================= */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(5, 20, 35, 0.78),
+      rgba(8, 55, 80, 0.65),
+      rgba(0, 0, 0, 0.78)
+    );
+
+  z-index: -1;
+}
+
+
+/* =========================================
+   ÁREA PRINCIPAL
+========================================= */
+
+.login-page {
+  width: 100%;
+  height: calc(100vh - 55px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 30px;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+
+.login-card {
+  width: 470px;
+
+  padding: 38px 45px 25px;
+
+  background: rgba(255, 255, 255, 0.96);
+
+  border-radius: 22px;
+
+  border: 1px solid rgba(255, 255, 255, 0.7);
+
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.45),
+    0 10px 30px rgba(0, 0, 0, 0.2);
+
+  backdrop-filter: blur(15px);
+
+  animation: aparecer 0.6s ease;
+}
+
+
+/* =========================================
+   ANIMAÇÃO
+========================================= */
+
+@keyframes aparecer {
+
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+}
+
+
+/* =========================================
+   LOGO
+========================================= */
+
+.logo-container {
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin-bottom: 5px;
+}
+
+.logo {
+  width: 125px;
+  height: 125px;
+
+  object-fit: contain;
+
+  display: block;
+
+  filter:
+    drop-shadow(
+      0 8px 16px rgba(0, 0, 0, 0.18)
+    );
+}
+
+
+/* =========================================
+   MEDCORE
+========================================= */
+
+.system-title {
+  text-align: center;
+
+  margin-bottom: 18px;
+}
+
+.system-title h1 {
+  color: #123b59;
+
+  font-size: 38px;
+
+  font-weight: 800;
+
+  letter-spacing: 4px;
+}
+
+.system-title p {
+  margin-top: 5px;
+
+  color: #64748b;
+
+  font-size: 14px;
+
+  letter-spacing: 1.5px;
+
+  text-transform: uppercase;
+}
+
+
+/* =========================================
+   LINHA
+========================================= */
+
+.separator {
+  width: 75px;
+  height: 4px;
+
+  margin: 0 auto 25px;
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #19a7ce,
+      #126a94
+    );
+}
+
+
+/* =========================================
+   LOGIN
+========================================= */
+
+.login-content h2 {
+  color: #1e293b;
+
+  font-size: 23px;
+
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  color: #64748b;
+
+  font-size: 14px;
+
+  margin-bottom: 22px;
+}
+
+
+/* =========================================
+   LABELS
+========================================= */
+
+label {
+  display: block;
+
+  margin-top: 15px;
+  margin-bottom: 7px;
+
+  color: #334155;
+
+  font-size: 14px;
+
+  font-weight: 600;
+}
+
+
+/* =========================================
+   INPUTS
+========================================= */
+
+.input-group {
+  position: relative;
+
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+
+  left: 15px;
+
+  font-size: 17px;
+
+  z-index: 2;
+}
+
+.input-group input {
+  width: 100%;
+  height: 52px;
+
+  padding: 0 48px;
+
+  border: 1px solid #d6dee7;
+
+  border-radius: 11px;
+
+  outline: none;
+
+  background: #f8fafc;
+
+  color: #1e293b;
+
+  font-size: 15px;
+
+  transition: 0.25s;
+}
+
+.input-group input::placeholder {
+  color: #94a3b8;
+}
+
+.input-group input:hover {
+  border-color: #b8c7d6;
+}
+
+.input-group input:focus {
+  border-color: #159bc5;
+
+  background: white;
+
+  box-shadow:
+    0 0 0 4px rgba(21, 155, 197, 0.12);
+}
+
+
+/* =========================================
+   MOSTRAR SENHA
+========================================= */
+
+.show-password {
+  position: absolute;
+
+  right: 8px;
+
+  width: 38px;
+  height: 38px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  font-size: 17px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  transition: 0.2s;
+}
+
+.show-password:hover {
+  background: #e8f4f8;
+}
+
+
+/* =========================================
+   BOTÃO ENTRAR
+========================================= */
+
+.login-button {
+  width: 100%;
+  height: 53px;
+
+  margin-top: 25px;
+
+  border: none;
+
+  border-radius: 11px;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #159bc5,
+      #126a94
+    );
+
+  color: white;
+
+  font-size: 15px;
+
+  font-weight: 700;
+
+  box-shadow:
+    0 8px 20px rgba(18, 106, 148, 0.28);
+
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.login-button:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 12px 28px rgba(18, 106, 148, 0.4);
+}
+
+.login-button:active {
+  transform: translateY(0);
+}
+
+.arrow {
+  font-size: 20px;
+
+  transition: 0.2s;
+}
+
+.login-button:hover .arrow {
+  transform: translateX(5px);
+}
+
+
+/* =========================================
+   SEGURANÇA
+========================================= */
+
+.secure-info {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  margin-top: 18px;
+
+  padding: 11px;
+
+  border-radius: 9px;
+
+  background: #f0f9fc;
+
+  color: #126a94;
+
+  font-size: 13px;
+}
+
+.secure-info div {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.secure-info strong {
+  font-size: 12px;
+}
+
+.secure-info small {
+  color: #64748b;
+
+  font-size: 11px;
+}
+
+.shield {
+  font-size: 20px;
+}
+
+
+/* =========================================
+   RODAPÉ DO CARD
+========================================= */
+
+.card-footer {
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  gap: 8px;
+
+  margin-top: 22px;
+
+  padding-top: 17px;
+
+  border-top: 1px solid #e2e8f0;
+
+  color: #94a3b8;
+
+  font-size: 11px;
+}
+
+.card-footer span:first-child {
+  color: #126a94;
+
+  font-weight: bold;
+}
+
+
+/* =========================================
+   RODAPÉ DA PÁGINA
+========================================= */
+
+.footer {
+  position: fixed;
+
+  bottom: 0;
+  left: 0;
+
+  width: 100%;
+
+  height: 55px;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  gap: 35px;
+
+  background: rgba(0, 0, 0, 0.28);
+
+  backdrop-filter: blur(8px);
+
+  color: rgba(255, 255, 255, 0.8);
+
+  font-size: 12px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+
+/* =========================================
+   TELAS GRANDES
+========================================= */
+
+@media (min-width: 1600px) {
+
+  .login-card {
+    width: 500px;
+
+    padding: 42px 48px 28px;
+  }
+
+  .logo {
+    width: 135px;
+    height: 135px;
+  }
+
+  .system-title h1 {
+    font-size: 40px;
+  }
+
+}
+
+
+/* =========================================
+   NOTEBOOK / TELA MENOR
+========================================= */
+
+@media (max-height: 750px) {
+
+  .login-card {
+    padding-top: 25px;
+    padding-bottom: 18px;
+  }
+
+  .logo {
+    width: 95px;
+    height: 95px;
+  }
+
+  .system-title {
+    margin-bottom: 12px;
+  }
+
+  .separator {
+    margin-bottom: 15px;
+  }
+
+  .login-button {
+    margin-top: 18px;
+  }
+
+  .secure-info {
+    margin-top: 12px;
+  }
+
+  .card-footer {
+    margin-top: 15px;
+    padding-top: 12px;
+  }
+
+}
+
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media (max-width: 700px) {
+
+  body {
+    overflow-y: auto;
+  }
+
+  .login-page {
+    min-height: 100vh;
+
+    height: auto;
+
+    padding: 25px 15px 70px;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 450px;
+
+    padding: 30px 25px 20px;
+  }
+
+  .logo {
+    width: 105px;
+    height: 105px;
+  }
+
+  .system-title h1 {
+    font-size: 30px;
+  }
+
+  .footer {
+    display: none;
+  }
+
+}
+
+
+/* =========================================
+   CELULAR PEQUENO
+========================================= */
+
+@media (max-width: 400px) {
+
+  .login-card {
+    padding: 25px 20px 18px;
+  }
+
+  .logo {
+    width: 90px;
+    height: 90px;
+  }
+
+  .system-title h1 {
+    font-size: 26px;
+
+    letter-spacing: 2px;
+  }
+
+  .login-content h2 {
+    font-size: 20px;
+  }
+
+}
