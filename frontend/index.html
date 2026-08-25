@@ -112,6 +112,7 @@
         <button
           class="login-button"
           onclick="login()"
+          type="button"
         >
 
           <span>Entrar no sistema</span>
@@ -172,7 +173,29 @@
 
   <script>
 
-    function login() {
+    /*
+      =====================================================
+      CONFIGURAÇÃO DO SERVIDOR
+      =====================================================
+
+      LOCAL:
+      http://localhost:3000
+
+      RENDER:
+      utiliza o mesmo domínio onde o sistema está hospedado.
+
+      Isso evita que o navegador tente acessar
+      localhost quando o sistema estiver publicado.
+    */
+
+    const API_URL =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+        ? "http://localhost:3000"
+        : "";
+
+
+    async function login() {
 
       const usuario =
         document.getElementById("usuario").value.trim();
@@ -181,6 +204,7 @@
         document.getElementById("senha").value;
 
 
+      // Verifica se os campos foram preenchidos
       if (!usuario || !senha) {
 
         alert("Preencha o usuário e a senha.");
@@ -190,68 +214,156 @@
       }
 
 
-      fetch("http://localhost:3000/login", {
+      // Desabilita o botão durante o login
+      const botao =
+        document.querySelector(".login-button");
 
-        method: "POST",
+      const textoOriginal =
+        botao.innerHTML;
 
-        headers: {
-          "Content-Type": "application/json"
-        },
+      botao.disabled = true;
 
-        body: JSON.stringify({
-          usuario: usuario,
-          senha: senha
-        })
+      botao.innerHTML =
+        "<span>Entrando...</span><span>⏳</span>";
 
-      })
 
-      .then(response => response.json())
+      try {
 
-      .then(data => {
+        /*
+          No computador:
 
-        if (data.tipo === "triagem") {
+          http://localhost:3000/login
 
-          location.href = "triagem.html";
+          No Render:
 
-        }
+          /login
 
-        else if (data.tipo === "medico") {
+          Assim o navegador usa o servidor correto.
+        */
 
-          location.href = "medico.html";
+        const response =
+          await fetch(`${API_URL}/login`, {
 
-        }
+            method: "POST",
 
-        else if (data.tipo === "atendimento") {
+            headers: {
+              "Content-Type": "application/json"
+            },
 
-          location.href = "atendimento.html";
+            body: JSON.stringify({
+              usuario: usuario,
+              senha: senha
+            })
 
-        }
+          });
 
-        else {
 
-          alert(
-            data.mensagem ||
-            "Usuário ou senha inválidos."
+        /*
+          Verifica se o servidor respondeu corretamente.
+        */
+
+        if (!response.ok) {
+
+          throw new Error(
+            `Servidor respondeu com erro: ${response.status}`
           );
 
         }
 
-      })
 
-      .catch(error => {
+        const data =
+          await response.json();
 
-        console.error(error);
+
+        console.log("Resposta do servidor:", data);
+
+
+        /*
+          LOGIN TRIAGEM
+        */
+
+        if (data.tipo === "triagem") {
+
+          window.location.href = "triagem.html";
+
+          return;
+
+        }
+
+
+        /*
+          LOGIN MÉDICO
+        */
+
+        if (data.tipo === "medico") {
+
+          window.location.href = "medico.html";
+
+          return;
+
+        }
+
+
+        /*
+          LOGIN ATENDIMENTO
+        */
+
+        if (data.tipo === "atendimento") {
+
+          window.location.href = "atendimento.html";
+
+          return;
+
+        }
+
+
+        /*
+          USUÁRIO OU SENHA INCORRETOS
+        */
 
         alert(
-          "Não foi possível conectar ao servidor."
+          data.mensagem ||
+          "Usuário ou senha inválidos."
         );
 
-      });
+      }
+
+
+      catch (error) {
+
+        console.error(
+          "Erro ao conectar com o servidor:",
+          error
+        );
+
+
+        alert(
+          "Não foi possível conectar ao servidor.\n\n" +
+          "Verifique se o servidor está funcionando."
+        );
+
+      }
+
+
+      finally {
+
+        /*
+          Reativa o botão
+        */
+
+        botao.disabled = false;
+
+        botao.innerHTML =
+          textoOriginal;
+
+      }
 
     }
 
 
-    /* MOSTRAR / ESCONDER SENHA */
+    /* =====================================================
+       MOSTRAR / ESCONDER SENHA
+       ===================================================== */
 
     function mostrarSenha() {
 
@@ -281,7 +393,9 @@
     }
 
 
-    /* ENTER PARA ENTRAR */
+    /* =====================================================
+       ENTER PARA ENTRAR
+       ===================================================== */
 
     document.addEventListener(
       "keydown",
