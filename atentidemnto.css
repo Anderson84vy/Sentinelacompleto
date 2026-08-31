@@ -1,1019 +1,752 @@
-/* =========================================
-   RESET
-========================================= */
+/* =========================================================
+   MEDCORE - ATENDIMENTO
+   Cadastro de paciente
+========================================================= */
 
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-
-html {
-  min-height: 100%;
+html,
+body {
+    min-height: 100%;
 }
-
 
 body {
-  min-height: 100vh;
-
-  font-family:
-    Inter,
-    "Segoe UI",
-    Arial,
-    sans-serif;
-
-  color: #1e293b;
-
-  background: #eef5f9;
-
-  overflow-x: hidden;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    color: #1e293b;
+    background: #eef5f9;
+    overflow-x: hidden;
 }
 
-
-
-/* =========================================
+/* =========================================================
    FUNDO
-========================================= */
+========================================================= */
 
 .background {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
 
-  position: fixed;
-
-  inset: 0;
-
-  background:
-    radial-gradient(
-      circle at 10% 10%,
-      rgba(20, 157, 197, 0.12),
-      transparent 35%
-    ),
-
-    radial-gradient(
-      circle at 90% 90%,
-      rgba(18, 106, 148, 0.10),
-      transparent 35%
-    );
-
-  z-index: -2;
-
+    background:
+        radial-gradient(
+            circle at 10% 10%,
+            rgba(20, 157, 197, 0.12),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 90% 90%,
+            rgba(18, 106, 148, 0.10),
+            transparent 35%
+        );
 }
-
 
 .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
 
-  position: fixed;
-
-  inset: 0;
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(255,255,255,0.88),
-      rgba(239,247,251,0.95)
-    );
-
-  z-index: -1;
-
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.90),
+            rgba(239, 247, 251, 0.96)
+        );
 }
 
-
-
-/* =========================================
-   BARRA SUPERIOR
-========================================= */
+/* =========================================================
+   TOPO
+========================================================= */
 
 .topbar {
+    width: 100%;
+    height: 72px;
 
-  height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-  width: 100%;
+    padding: 0 42px;
 
-  display: flex;
+    background: rgba(255, 255, 255, 0.97);
 
-  align-items: center;
+    border-bottom: 1px solid #dce7ee;
 
-  justify-content: space-between;
-
-  padding: 0 42px;
-
-  background:
-    rgba(255,255,255,0.96);
-
-  border-bottom:
-    1px solid #dce7ee;
-
-  box-shadow:
-    0 3px 18px rgba(15, 65, 90, 0.06);
-
+    box-shadow:
+        0 3px 18px rgba(15, 65, 90, 0.07);
 }
-
 
 .brand {
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 12px;
-
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
-
 
 .brand-icon {
+    width: 43px;
+    height: 43px;
 
-  width: 43px;
-  height: 43px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  display: flex;
+    border-radius: 12px;
 
-  align-items: center;
-  justify-content: center;
+    background:
+        linear-gradient(
+            135deg,
+            #159bc5,
+            #126a94
+        );
 
-  border-radius: 12px;
+    color: white;
+    font-size: 21px;
 
-  background:
-    linear-gradient(
-      135deg,
-      #159bc5,
-      #126a94
-    );
-
-  color: white;
-
-  font-size: 21px;
-
-  box-shadow:
-    0 6px 15px
-    rgba(18, 106, 148, 0.25);
-
+    box-shadow:
+        0 6px 15px rgba(18, 106, 148, 0.25);
 }
-
 
 .brand strong {
+    display: block;
 
-  display: block;
+    color: #123b59;
 
-  color: #123b59;
-
-  font-size: 19px;
-
-  letter-spacing: 2px;
-
+    font-size: 19px;
+    letter-spacing: 2px;
 }
-
 
 .brand span {
+    display: block;
 
-  display: block;
+    margin-top: 2px;
 
-  margin-top: 2px;
+    color: #78909c;
 
-  color: #78909c;
+    font-size: 10px;
 
-  font-size: 10px;
-
-  text-transform: uppercase;
-
-  letter-spacing: 1px;
-
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
-
 
 .topbar-right {
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 28px;
-
+    display: flex;
+    align-items: center;
+    gap: 28px;
 }
-
 
 .status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
 
-  display: flex;
-
-  align-items: center;
-
-  gap: 7px;
-
-  color: #64748b;
-
-  font-size: 13px;
-
+    color: #64748b;
+    font-size: 13px;
 }
-
 
 .status-dot {
+    width: 8px;
+    height: 8px;
 
-  width: 8px;
-  height: 8px;
+    border-radius: 50%;
 
-  border-radius: 50%;
+    background: #22c55e;
 
-  background: #22c55e;
-
-  box-shadow:
-    0 0 0 4px
-    rgba(34,197,94,0.12);
-
+    box-shadow:
+        0 0 0 4px rgba(34, 197, 94, 0.12);
 }
-
 
 .user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 
-  display: flex;
+    color: #475569;
 
-  align-items: center;
-
-  gap: 8px;
-
-  color: #475569;
-
-  font-size: 13px;
-
-  font-weight: 600;
-
+    font-size: 13px;
+    font-weight: 600;
 }
-
 
 .user-icon {
+    width: 34px;
+    height: 34px;
 
-  width: 34px;
-  height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  display: flex;
+    border-radius: 50%;
 
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  background: #e8f5f9;
-
+    background: #e8f5f9;
 }
 
-
-
-/* =========================================
+/* =========================================================
    PÁGINA
-========================================= */
+========================================================= */
 
 .page {
+    width: 100%;
+    max-width: 1100px;
 
-  width: 100%;
+    margin: 0 auto;
 
-  max-width: 1100px;
-
-  margin: 0 auto;
-
-  padding:
-    38px 25px 60px;
-
+    padding: 38px 25px 60px;
 }
 
-
-
-/* =========================================
-   CABEÇALHO DA PÁGINA
-========================================= */
+/* =========================================================
+   CABEÇALHO
+========================================================= */
 
 .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  margin-bottom: 28px;
-
+    margin-bottom: 28px;
 }
-
 
 .page-tag {
+    display: inline-block;
 
-  display: inline-block;
+    margin-bottom: 8px;
 
-  margin-bottom: 8px;
+    color: #159bc5;
 
-  color: #159bc5;
+    font-size: 11px;
+    font-weight: 800;
 
-  font-size: 11px;
-
-  font-weight: 800;
-
-  letter-spacing: 1.8px;
-
+    letter-spacing: 1.8px;
 }
-
 
 .page-header h1 {
+    color: #123b59;
 
-  color: #123b59;
-
-  font-size: 30px;
-
-  font-weight: 750;
-
+    font-size: 30px;
+    font-weight: 750;
 }
-
 
 .page-header p {
+    margin-top: 7px;
 
-  margin-top: 7px;
+    color: #64748b;
 
-  color: #64748b;
-
-  font-size: 14px;
-
+    font-size: 14px;
 }
-
 
 .header-icon {
+    width: 64px;
+    height: 64px;
 
-  width: 64px;
-  height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  display: flex;
+    border-radius: 18px;
 
-  align-items: center;
-  justify-content: center;
+    background:
+        linear-gradient(
+            135deg,
+            #e9f8fc,
+            #d8f0f6
+        );
 
-  border-radius: 18px;
+    border: 1px solid #cbe8ef;
 
-  background:
-    linear-gradient(
-      135deg,
-      #e9f8fc,
-      #d8f0f6
-    );
-
-  border:
-    1px solid #cbe8ef;
-
-  font-size: 28px;
-
+    font-size: 28px;
 }
 
-
-
-/* =========================================
-   CARD PRINCIPAL
-========================================= */
+/* =========================================================
+   CARD
+========================================================= */
 
 .form-card {
+    width: 100%;
 
-  background: rgba(255,255,255,0.98);
+    background: rgba(255, 255, 255, 0.98);
 
-  border:
-    1px solid #dfe9ef;
+    border: 1px solid #dfe9ef;
 
-  border-radius: 20px;
+    border-radius: 20px;
 
-  padding: 34px;
+    padding: 34px;
 
-  box-shadow:
-    0 15px 45px
-    rgba(15, 65, 90, 0.08);
-
+    box-shadow:
+        0 15px 45px rgba(15, 65, 90, 0.08);
 }
 
-
-
-/* =========================================
-   CABEÇALHO DAS SEÇÕES
-========================================= */
+/* =========================================================
+   SEÇÕES
+========================================================= */
 
 .section-header {
+    display: flex;
+    align-items: center;
 
-  display: flex;
+    gap: 13px;
 
-  align-items: center;
+    padding-bottom: 20px;
 
-  gap: 13px;
-
-  padding-bottom: 20px;
-
-  border-bottom:
-    1px solid #e8eef2;
-
+    border-bottom: 1px solid #e8eef2;
 }
-
 
 .section-icon {
+    width: 43px;
+    height: 43px;
 
-  width: 43px;
-  height: 43px;
+    flex-shrink: 0;
 
-  flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  display: flex;
+    border-radius: 12px;
 
-  align-items: center;
-  justify-content: center;
+    background: #eaf7fb;
 
-  border-radius: 12px;
-
-  background: #eaf7fb;
-
-  font-size: 20px;
-
+    font-size: 20px;
 }
-
 
 .section-header h2 {
+    color: #1e3a4f;
 
-  color: #1e3a4f;
-
-  font-size: 17px;
-
-  font-weight: 700;
-
+    font-size: 17px;
+    font-weight: 700;
 }
-
 
 .section-header p {
+    margin-top: 3px;
 
-  margin-top: 3px;
+    color: #8a9aa6;
 
-  color: #8a9aa6;
-
-  font-size: 12px;
-
+    font-size: 12px;
 }
-
 
 .section-space {
-
-  margin-top: 34px;
-
+    margin-top: 34px;
 }
 
-
-
-/* =========================================
-   GRID DO FORMULÁRIO
-========================================= */
+/* =========================================================
+   GRID
+========================================================= */
 
 .form-grid {
+    display: grid;
 
-  display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 
-  grid-template-columns:
-    repeat(2, 1fr);
+    gap: 20px 22px;
 
-  gap:
-    20px 22px;
-
-  padding-top: 22px;
-
+    padding-top: 22px;
 }
-
 
 .field {
-
-  min-width: 0;
-
+    min-width: 0;
 }
-
 
 .field-full {
-
-  grid-column: 1 / -1;
-
+    grid-column: 1 / -1;
 }
 
-
-
-/* =========================================
-   LABEL
-========================================= */
+/* =========================================================
+   LABELS
+========================================================= */
 
 .field label {
+    display: block;
 
-  display: block;
+    margin-bottom: 8px;
 
-  margin-bottom: 8px;
+    color: #334155;
 
-  color: #334155;
-
-  font-size: 13px;
-
-  font-weight: 650;
-
+    font-size: 13px;
+    font-weight: 650;
 }
-
 
 .field label span {
-
-  color: #ef4444;
-
-  margin-left: 2px;
-
+    color: #ef4444;
+    margin-left: 2px;
 }
 
-
-
-/* =========================================
-   INPUT
-========================================= */
+/* =========================================================
+   INPUTS
+========================================================= */
 
 .input-wrapper {
-
-  position: relative;
-
-  width: 100%;
-
+    position: relative;
+    width: 100%;
 }
-
 
 .input-icon {
+    position: absolute;
 
-  position: absolute;
+    left: 15px;
+    top: 50%;
 
-  left: 15px;
+    transform: translateY(-50%);
 
-  top: 50%;
+    font-size: 16px;
 
-  transform:
-    translateY(-50%);
+    opacity: 0.75;
 
-  font-size: 16px;
+    pointer-events: none;
 
-  opacity: 0.75;
-
-  pointer-events: none;
-
+    z-index: 2;
 }
-
 
 .input-wrapper input,
-.input-wrapper select {
+.input-wrapper select,
+.field input,
+.field select {
+    width: 100%;
 
-  width: 100%;
+    height: 48px;
 
-  height: 48px;
+    padding: 0 15px 0 45px;
 
-  padding:
-    0 15px 0 45px;
+    border: 1px solid #d7e2e8;
 
-  border:
-    1px solid #d7e2e8;
+    border-radius: 10px;
 
-  border-radius: 10px;
+    outline: none;
 
-  outline: none;
+    background: #f9fbfc;
 
-  background: #f9fbfc;
+    color: #1e293b;
 
-  color: #1e293b;
+    font-family: inherit;
 
-  font-size: 14px;
+    font-size: 14px;
 
-  transition:
-    0.2s ease;
-
+    transition: 0.2s ease;
 }
 
-
-.input-wrapper input::placeholder {
-
-  color: #a2afb8;
-
+.input-wrapper input::placeholder,
+.field input::placeholder {
+    color: #a2afb8;
 }
-
 
 .input-wrapper input:hover,
-.input-wrapper select:hover {
-
-  border-color: #b8cbd5;
-
+.input-wrapper select:hover,
+.field input:hover,
+.field select:hover {
+    border-color: #b8cbd5;
 }
-
 
 .input-wrapper input:focus,
-.input-wrapper select:focus {
+.input-wrapper select:focus,
+.field input:focus,
+.field select:focus {
+    border-color: #159bc5;
 
-  border-color: #159bc5;
+    background: white;
 
-  background: white;
-
-  box-shadow:
-    0 0 0 4px
-    rgba(21,155,197,0.10);
-
+    box-shadow:
+        0 0 0 4px rgba(21, 155, 197, 0.10);
 }
 
-
-
-/* =========================================
+/* =========================================================
    SELECT
-========================================= */
+========================================================= */
 
-.input-wrapper select {
+.input-wrapper select,
+.field select {
+    appearance: auto;
 
-  appearance: auto;
-
-  cursor: pointer;
-
+    cursor: pointer;
 }
 
+/* =========================================================
+   DATA
+========================================================= */
 
+input[type="date"] {
+    padding-left: 15px;
+}
 
-/* =========================================
+/* =========================================================
    ARQUIVO
-========================================= */
+========================================================= */
 
 .file-wrapper {
-
-  height: 48px;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 10px;
-
-  padding: 5px 10px;
-
-  border:
-    1px dashed #c9d9e1;
-
-  border-radius: 10px;
-
-  background: #f9fbfc;
-
-}
-
-
-.file-wrapper input {
-
-  display: none;
-
-}
-
-
-.file-button {
-
-  height: 36px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  padding: 0 14px;
-
-  border-radius: 8px;
-
-  background: #e9f6fa;
-
-  color: #126a94;
-
-  font-size: 12px;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition: 0.2s;
-
-}
-
-
-.file-button:hover {
-
-  background: #d9f0f6;
-
-}
-
-
-#file-name {
-
-  overflow: hidden;
-
-  white-space: nowrap;
-
-  text-overflow: ellipsis;
-
-  color: #8a9aa6;
-
-  font-size: 12px;
-
-}
-
-
-
-/* =========================================
-   RODAPÉ DO FORMULÁRIO
-========================================= */
-
-.form-footer {
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  margin-top: 34px;
-
-  padding-top: 23px;
-
-  border-top:
-    1px solid #e8eef2;
-
-}
-
-
-.required-info {
-
-  color: #8a9aa6;
-
-  font-size: 12px;
-
-}
-
-
-.required-info span {
-
-  color: #ef4444;
-
-  font-weight: bold;
-
-}
-
-
-.register-button {
-
-  height: 48px;
-
-  padding:
-    0 24px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  gap: 9px;
-
-  border: none;
-
-  border-radius: 10px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #159bc5,
-      #126a94
-    );
-
-  color: white;
-
-  font-size: 14px;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  box-shadow:
-    0 8px 20px
-    rgba(18,106,148,0.23);
-
-  transition:
-    0.2s ease;
-
-}
-
-
-.register-button:hover {
-
-  transform:
-    translateY(-2px);
-
-  box-shadow:
-    0 12px 26px
-    rgba(18,106,148,0.30);
-
-}
-
-
-.register-button:active {
-
-  transform:
-    translateY(0);
-
-}
-
-
-.register-button span {
-
-  font-size: 18px;
-
-}
-
-
-
-/* =========================================
-   SEGURANÇA
-========================================= */
-
-.security {
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 12px;
-
-  margin-top: 18px;
-
-  padding:
-    14px 18px;
-
-  border-radius: 12px;
-
-  background:
-    rgba(233,247,251,0.75);
-
-  border:
-    1px solid #d5edf3;
-
-  color: #126a94;
-
-}
-
-
-.security > span {
-
-  font-size: 20px;
-
-}
-
-
-.security strong {
-
-  display: block;
-
-  margin-bottom: 2px;
-
-  font-size: 12px;
-
-}
-
-
-.security small {
-
-  color: #718491;
-
-  font-size: 11px;
-
-}
-
-
-
-/* =========================================
-   RESPONSIVO
-========================================= */
-
-@media (max-width: 800px) {
-
-  .topbar {
-
-    padding: 0 20px;
-
-  }
-
-
-  .topbar-right {
+    width: 100%;
+    min-height: 48px;
+
+    display: flex;
+    align-items: center;
 
     gap: 10px;
 
-  }
+    padding: 5px 10px;
 
+    border: 1px dashed #c9d9e1;
 
-  .status {
+    border-radius: 10px;
 
-    display: none;
-
-  }
-
-
-  .page {
-
-    padding:
-      28px 15px 45px;
-
-  }
-
-
-  .form-card {
-
-    padding: 25px 20px;
-
-  }
-
-
-  .form-grid {
-
-    grid-template-columns: 1fr;
-
-  }
-
-
-  .field-full {
-
-    grid-column: auto;
-
-  }
-
+    background: #f9fbfc;
 }
 
+.file-wrapper input[type="file"] {
+    display: none;
+}
 
+.file-button {
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 14px;
+
+    border-radius: 8px;
+
+    background: #e9f6fa;
+
+    color: #126a94;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.file-button:hover {
+    background: #d9f0f6;
+}
+
+#file-name {
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    color: #8a9aa6;
+
+    font-size: 12px;
+}
+
+/* =========================================================
+   RODAPÉ
+========================================================= */
+
+.form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 34px;
+
+    padding-top: 23px;
+
+    border-top: 1px solid #e8eef2;
+}
+
+.required-info {
+    color: #8a9aa6;
+
+    font-size: 12px;
+}
+
+.required-info span {
+    color: #ef4444;
+
+    font-weight: bold;
+}
+
+.register-button {
+    height: 48px;
+
+    padding: 0 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 9px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #159bc5,
+            #126a94
+        );
+
+    color: white;
+
+    font-family: inherit;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 8px 20px rgba(18, 106, 148, 0.23);
+
+    transition: 0.2s ease;
+}
+
+.register-button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 12px 26px rgba(18, 106, 148, 0.30);
+}
+
+.register-button:active {
+    transform: translateY(0);
+}
+
+.register-button span {
+    font-size: 18px;
+}
+
+/* =========================================================
+   SEGURANÇA
+========================================================= */
+
+.security {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    margin-top: 18px;
+
+    padding: 14px 18px;
+
+    border-radius: 12px;
+
+    background: rgba(233, 247, 251, 0.75);
+
+    border: 1px solid #d5edf3;
+
+    color: #126a94;
+}
+
+.security > span {
+    font-size: 20px;
+}
+
+.security strong {
+    display: block;
+
+    margin-bottom: 2px;
+
+    font-size: 12px;
+}
+
+.security small {
+    color: #718491;
+
+    font-size: 11px;
+}
+
+/* =========================================================
+   GARANTIA CONTRA ELEMENTOS SOLTOS
+========================================================= */
+
+.page > form {
+    width: 100%;
+}
+
+form {
+    width: 100%;
+}
+
+button {
+    font-family: inherit;
+}
+
+/* =========================================================
+   RESPONSIVO
+========================================================= */
+
+@media (max-width: 800px) {
+
+    .topbar {
+        padding: 0 20px;
+    }
+
+    .topbar-right {
+        gap: 10px;
+    }
+
+    .status {
+        display: none;
+    }
+
+    .page {
+        padding: 28px 15px 45px;
+    }
+
+    .form-card {
+        padding: 25px 20px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .field-full {
+        grid-column: auto;
+    }
+}
 
 @media (max-width: 550px) {
 
-  .topbar {
+    .topbar {
+        height: 64px;
+    }
 
-    height: 64px;
+    .brand strong {
+        font-size: 16px;
+    }
 
-  }
+    .brand span {
+        display: none;
+    }
 
+    .user-info {
+        font-size: 0;
+    }
 
-  .brand strong {
+    .user-icon {
+        font-size: 16px;
+    }
 
-    font-size: 16px;
+    .page-header h1 {
+        font-size: 24px;
+    }
 
-  }
+    .page-header p {
+        line-height: 1.5;
+    }
 
+    .header-icon {
+        width: 50px;
+        height: 50px;
 
-  .brand span {
+        font-size: 22px;
+    }
 
-    display: none;
+    .form-footer {
+        flex-direction: column;
 
-  }
+        align-items: stretch;
 
+        gap: 15px;
+    }
 
-  .user-info {
-
-    font-size: 0;
-
-  }
-
-
-  .user-icon {
-
-    font-size: 16px;
-
-  }
-
-
-  .page-header h1 {
-
-    font-size: 24px;
-
-  }
-
-
-  .page-header p {
-
-    line-height: 1.5;
-
-  }
-
-
-  .header-icon {
-
-    width: 50px;
-
-    height: 50px;
-
-    font-size: 22px;
-
-  }
-
-
-  .form-footer {
-
-    flex-direction: column;
-
-    align-items: stretch;
-
-    gap: 15px;
-
-  }
-
-
-  .register-button {
-
-    width: 100%;
-
-  }
-
+    .register-button {
+        width: 100%;
+    }
 }
