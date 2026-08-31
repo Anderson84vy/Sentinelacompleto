@@ -1,942 +1,961 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-
-<head>
-
-  <meta charset="UTF-8">
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>MEDCORE | Atendimento</title>
-
-<link rel="stylesheet" href="atendimento.css">
-
-</head>
-
-<body>
-
-  <!-- FUNDO -->
-  <div class="background"></div>
-  <div class="overlay"></div>
-
-
-  <!-- =========================================
-       CABEÇALHO
-  ========================================== -->
-
-  <header class="topbar">
-
-    <div class="brand">
-
-      <div class="brand-icon">
-        🏥
-      </div>
-
-      <div>
-        <strong>MEDCORE</strong>
-        <span>Sistema Hospitalar</span>
-      </div>
-
-    </div>
-
-
-    <div class="topbar-right">
-
-      <div class="status">
-        <span class="status-dot"></span>
-        Sistema online
-      </div>
-
-      <div class="user-info">
-        <span class="user-icon">👤</span>
-        Atendimento
-      </div>
-
-    </div>
-
-  </header>
-
-
-
-  <!-- =========================================
-       CONTEÚDO
-  ========================================== -->
-
-  <main class="page">
-
-    <div class="page-header">
-
-      <div>
-
-        <span class="page-tag">
-          ATENDIMENTO
-        </span>
-
-        <h1>
-          Cadastro de paciente
-        </h1>
-
-        <p>
-          Preencha os dados abaixo para registrar um novo paciente no sistema.
-        </p>
-
-      </div>
-
-      <div class="header-icon">
-        🩺
-      </div>
-
-    </div>
-
-
-
-    <!-- =========================================
-         FORMULÁRIO
-    ========================================== -->
-
-    <section class="form-card">
-
-
-      <!-- DADOS PESSOAIS -->
-
-      <div class="section-header">
-
-        <div class="section-icon">
-          👤
-        </div>
-
-        <div>
-
-          <h2>Dados pessoais</h2>
-
-          <p>
-            Informações básicas do paciente
-          </p>
-
-        </div>
-
-      </div>
-
-
-      <div class="form-grid">
-
-
-        <!-- NOME -->
-
-        <div class="field field-full">
-
-          <label for="nome">
-            Nome completo
-            <span>*</span>
-          </label>
-
-          <div class="input-wrapper">
-
-            <span class="input-icon">👤</span>
-
-            <input
-              id="nome"
-              type="text"
-              placeholder="Digite o nome completo"
-              autocomplete="name"
-            >
-
-          </div>
-
-        </div>
-
-
-
-        <!-- CPF -->
-
-        <div class="field">
-
-          <label for="cpf">
-            CPF
-            <span>*</span>
-          </label>
-
-          <div class="input-wrapper">
-
-            <span class="input-icon">🪪</span>
-
-            <input
-              id="cpf"
-              type="text"
-              placeholder="000.000.000-00"
-              maxlength="14"
-            >
-
-          </div>
-
-        </div>
-
-
-
-        <!-- NOME DA MÃE -->
-
-        <div class="field">
-
-          <label for="mae">
-            Nome da mãe
-            <span>*</span>
-          </label>
-
-          <div class="input-wrapper">
-
-            <span class="input-icon">👩</span>
-
-            <input
-              id="mae"
-              type="text"
-              placeholder="Nome completo da mãe"
-            >
-
-          </div>
-
-        </div>
-
-
-
-        <!-- DATA NASCIMENTO -->
-
-        <div class="field">
-
-          <label for="nascimento">
-            Data de nascimento
-            <span>*</span>
-          </label>
-
-          <div class="input-wrapper">
-
-            <span class="input-icon">📅</span>
-
-            <input
-              id="nascimento"
-              type="date"
-            >
-
-          </div>
-
-        </div>
-
-
-
-        <!-- ESTADO CIVIL -->
-
-        <div class="field">
-
-          <label for="estadoCivil">
-            Estado civil
-            <span>*</span>
-          </label>
-
-          <div class="input-wrapper">
-
-            <span class="input-icon">💍</span>
-
-            <select id="estadoCivil">
-
-              <option value="">
-                Selecione
-              </option>
-
-              <option value="Solteiro(a)">
-                Solteiro(a)
-              </option>
-
-              <option value="Casado(a)">
-                Casado(a)
-              </option>
-
-              <option value="Divorciado(a)">
-                Divorciado(a)
-              </option>
-
-              <option value="Viúvo(a)">
-                Viúvo(a)
-              </option>
-
-              <option value="Separado(a)">
-                Separado(a)
-              </option>
-
-              <option value="União estável">
-                União estável
-              </option>
-
-            </select>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- =========================================
-           CONTATO
-      ========================================== -->
-
-      <div class="section-header section-space">
-
-        <div class="section-icon">
-          📞
-        </div>
-
-        <div>
-
-          <h2>Contato</h2>
-
-          <p>
-            Informações para comunicação
-          </p>
-
-        </div>
-
-      </div>
-
-
-      <div class="form-grid">
-
-
-        <!-- TELEFONE -->
-
-        <div class="field">
-
-          <label for="telefone">
-            Telefone
-            <span>*</span>
-          </label>
-
-          <div class="input-wrapper">
-
-            <span class="input-icon">📱</span>
-
-            <input
-              id="telefone"
-              type="tel"
-              placeholder="(00) 00000-0000"
-              autocomplete="tel"
-            >
-
-          </div>
-
-        </div>
-
-
-
-        <!-- EMAIL -->
-
-        <div class="field">
-
-          <label for="email">
-            E-mail
-          </label>
-
-          <div class="input-wrapper">
-
-            <span class="input-icon">✉️</span>
-
-            <input
-              id="email"
-              type="email"
-              placeholder="exemplo@email.com"
-              autocomplete="email"
-            >
-
-          </div>
-
-        </div>
-
-
-
-        <!-- EMERGÊNCIA -->
-
-        <div class="field field-full">
-
-          <label for="emergencia">
-            Contato de emergência
-            <span>*</span>
-          </label>
-
-          <div class="input-wrapper">
-
-            <span class="input-icon">🚨</span>
-
-            <input
-              id="emergencia"
-              type="text"
-              placeholder="Nome e telefone do contato"
-            >
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- =========================================
-           ENDEREÇO
-      ========================================== -->
-
-      <div class="section-header section-space">
-
-        <div class="section-icon">
-          📍
-        </div>
-
-        <div>
-
-          <h2>Endereço</h2>
-
-          <p>
-            Localização residencial do paciente
-          </p>
-
-        </div>
-
-      </div>
-
-
-      <div class="form-grid">
-
-        <div class="field field-full">
-
-          <label for="endereco">
-            Endereço completo
-            <span>*</span>
-          </label>
-
-          <div class="input-wrapper">
-
-            <span class="input-icon">📍</span>
-
-            <input
-              id="endereco"
-              type="text"
-              placeholder="Rua, número, bairro, cidade e estado"
-              autocomplete="street-address"
-            >
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- =========================================
-           INFORMAÇÕES DO ATENDIMENTO
-      ========================================== -->
-
-      <div class="section-header section-space">
-
-        <div class="section-icon">
-          🏥
-        </div>
-
-        <div>
-
-          <h2>Informações do atendimento</h2>
-
-          <p>
-            Dados relacionados ao atendimento
-          </p>
-
-        </div>
-
-      </div>
-
-
-      <div class="form-grid">
-
-
-        <!-- CONVÊNIO -->
-
-        <div class="field">
-
-          <label for="tipo">
-            Tipo de atendimento
-            <span>*</span>
-          </label>
-
-          <div class="input-wrapper">
-
-            <span class="input-icon">💳</span>
-
-            <select id="tipo">
-
-              <option value="">
-                Selecione
-              </option>
-
-              <option value="Convenio">
-                Convênio
-              </option>
-
-              <option value="Particular">
-                Particular
-              </option>
-
-            </select>
-
-          </div>
-
-        </div>
-
-
-
-        <!-- DOCUMENTO -->
-
-        <div class="field">
-
-          <label for="foto">
-            Documento / Foto
-          </label>
-
-          <div class="file-wrapper">
-
-            <input
-              type="file"
-              id="foto"
-              accept="image/*,.pdf"
-            >
-
-            <label
-              for="foto"
-              class="file-button"
-            >
-              📎 Escolher arquivo
-            </label>
-
-            <span id="file-name">
-              Nenhum arquivo selecionado
-            </span>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- =========================================
-           RODAPÉ DO FORMULÁRIO
-      ========================================== -->
-
-      <div class="form-footer">
-
-        <div class="required-info">
-
-          <span>*</span>
-
-          Campos obrigatórios
-
-        </div>
-
-
-        <button
-          type="button"
-          class="register-button"
-          onclick="cadastrar()"
-        >
-
-          <span>✓</span>
-
-          Cadastrar paciente
-
-        </button>
-
-      </div>
-
-
-    </section>
-
-
-    <!-- SEGURANÇA -->
-
-    <div class="security">
-
-      <span>🔒</span>
-
-      <div>
-
-        <strong>
-          Dados protegidos
-        </strong>
-
-        <small>
-          As informações do paciente são armazenadas de forma segura no sistema MEDCORE.
-        </small>
-
-      </div>
-
-    </div>
-
-  </main>
-
-
-
-  <!-- =========================================
-       JAVASCRIPT
-  ========================================== -->
-
-  <script>
-
-    const API_URL =
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
-        ? "http://localhost:3000"
-        : "";
-
-
-
-    async function cadastrar() {
-
-      const nome =
-        document.getElementById("nome").value.trim();
-
-      const cpf =
-        document.getElementById("cpf").value.trim();
-
-      const mae =
-        document.getElementById("mae").value.trim();
-
-      const nascimento =
-        document.getElementById("nascimento").value;
-
-      const estadoCivil =
-        document.getElementById("estadoCivil").value;
-
-      const telefone =
-        document.getElementById("telefone").value.trim();
-
-      const email =
-        document.getElementById("email").value.trim();
-
-      const emergencia =
-        document.getElementById("emergencia").value.trim();
-
-      const endereco =
-        document.getElementById("endereco").value.trim();
-
-      const tipo =
-        document.getElementById("tipo").value;
-
-
-
-      if (
-        !nome ||
-        !cpf ||
-        !mae ||
-        !nascimento ||
-        !estadoCivil ||
-        !telefone ||
-        !emergencia ||
-        !endereco ||
-        !tipo
-      ) {
-
-        alert(
-          "Preencha todos os campos obrigatórios."
+/* =========================================================
+   MEDCORE — ATENDIMENTO
+   CSS EXCLUSIVO DA PÁGINA atendimento.html
+========================================================= */
+
+/* =========================
+   RESET
+========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    font-family: "Segoe UI", Inter, Arial, sans-serif;
+    color: #1e293b;
+    background: #eef5f9;
+    overflow-x: hidden;
+}
+
+
+/* =========================
+   FUNDO
+========================= */
+
+.background {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+
+    background:
+        radial-gradient(
+            circle at 10% 10%,
+            rgba(21, 155, 197, 0.15),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 90% 85%,
+            rgba(18, 106, 148, 0.12),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #f5fafc 0%,
+            #eaf4f8 50%,
+            #f7fbfd 100%
+        );
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.72),
+            rgba(239, 247, 251, 0.82)
+        );
+}
+
+
+/* =========================
+   BARRA SUPERIOR
+========================= */
+
+.topbar {
+    width: 100%;
+    height: 76px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 48px;
+
+    background: rgba(255, 255, 255, 0.96);
+
+    border-bottom: 1px solid #dce8ee;
+
+    box-shadow:
+        0 4px 20px rgba(15, 65, 90, 0.08);
+
+    position: relative;
+    z-index: 10;
+}
+
+
+/* =========================
+   MARCA
+========================= */
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.brand-icon {
+    width: 45px;
+    height: 45px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #159bc5,
+            #126a94
         );
 
-        return;
+    color: #fff;
+    font-size: 21px;
 
-      }
+    box-shadow:
+        0 7px 18px rgba(18, 106, 148, 0.25);
+}
 
+.brand strong {
+    display: block;
 
+    color: #123b59;
 
-      const paciente = {
+    font-size: 20px;
+    font-weight: 800;
 
-        nome: nome,
+    letter-spacing: 2px;
+}
 
-        cpf: cpf,
+.brand span {
+    display: block;
 
-        mae: mae,
+    margin-top: 2px;
 
-        nascimento: nascimento,
+    color: #78909c;
 
-        estadoCivil: estadoCivil,
+    font-size: 10px;
+    font-weight: 600;
 
-        telefone: telefone,
-
-        email: email,
-
-        emergencia: emergencia,
-
-        endereco: endereco,
-
-        tipo: tipo
-
-      };
-
-
-
-      try {
-
-        const response =
-          await fetch(
-            `${API_URL}/atendimento`,
-            {
-
-              method: "POST",
-
-              headers: {
-                "Content-Type": "application/json"
-              },
-
-              body:
-                JSON.stringify(paciente)
-
-            }
-          );
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+}
 
 
+/* =========================
+   PARTE DIREITA
+========================= */
 
-        if (!response.ok) {
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
 
-          throw new Error(
-            `Erro HTTP: ${response.status}`
-          );
+.status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 
-        }
+    color: #64748b;
+
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.status-dot {
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    background: #22c55e;
+
+    box-shadow:
+        0 0 0 4px rgba(34, 197, 94, 0.12);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    color: #475569;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.user-icon {
+    width: 35px;
+    height: 35px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #e8f5f9;
+
+    border: 1px solid #d7edf3;
+}
 
 
+/* =========================
+   CONTEÚDO PRINCIPAL
+========================= */
 
-        const data =
-          await response
-            .json()
-            .catch(() => ({}));
+.page {
+    width: 100%;
+    max-width: 1120px;
+
+    margin: 0 auto;
+
+    padding: 42px 25px 70px;
+}
 
 
+/* =========================
+   CABEÇALHO
+========================= */
 
-        console.log(
-          "Paciente cadastrado:",
-          data
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 30px;
+}
+
+.page-tag {
+    display: inline-block;
+
+    margin-bottom: 8px;
+
+    color: #159bc5;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+.page-header h1 {
+    color: #123b59;
+
+    font-size: 32px;
+    line-height: 1.2;
+
+    font-weight: 750;
+}
+
+.page-header p {
+    margin-top: 8px;
+
+    color: #64748b;
+
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.header-icon {
+    width: 68px;
+    height: 68px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #e8f8fc,
+            #d5eff6
         );
 
+    border: 1px solid #c8e7ef;
+
+    font-size: 29px;
+
+    box-shadow:
+        0 8px 22px rgba(18, 106, 148, 0.10);
+}
 
 
-        alert(
-          "Paciente cadastrado com sucesso!\n\n" +
-          "O paciente foi enviado para a triagem."
+/* =========================
+   CARD DO FORMULÁRIO
+========================= */
+
+.form-card {
+    width: 100%;
+
+    background: rgba(255, 255, 255, 0.98);
+
+    border: 1px solid #dce7ed;
+
+    border-radius: 20px;
+
+    padding: 36px;
+
+    box-shadow:
+        0 18px 50px rgba(15, 65, 90, 0.09);
+}
+
+
+/* =========================
+   CABEÇALHO DAS SEÇÕES
+========================= */
+
+.section-header {
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    padding-bottom: 20px;
+
+    border-bottom: 1px solid #e7eef2;
+}
+
+.section-space {
+    margin-top: 38px;
+}
+
+.section-icon {
+    width: 44px;
+    height: 44px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #eaf8fc,
+            #def1f6
         );
 
+    border: 1px solid #d4ebf1;
+
+    font-size: 19px;
+}
+
+.section-header h2 {
+    color: #1e3a4f;
+
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.section-header p {
+    margin-top: 3px;
+
+    color: #8a9aa6;
+
+    font-size: 12px;
+}
 
 
-        document
-          .getElementById("nome")
-          .value = "";
+/* =========================
+   GRID
+========================= */
 
-        document
-          .getElementById("cpf")
-          .value = "";
+.form-grid {
+    width: 100%;
 
-        document
-          .getElementById("mae")
-          .value = "";
+    display: grid;
 
-        document
-          .getElementById("nascimento")
-          .value = "";
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 
-        document
-          .getElementById("estadoCivil")
-          .value = "";
+    gap: 21px 24px;
 
-        document
-          .getElementById("telefone")
-          .value = "";
+    padding-top: 23px;
+}
 
-        document
-          .getElementById("email")
-          .value = "";
+.field {
+    width: 100%;
+    min-width: 0;
+}
 
-        document
-          .getElementById("emergencia")
-          .value = "";
-
-        document
-          .getElementById("endereco")
-          .value = "";
-
-        document
-          .getElementById("tipo")
-          .value = "";
-
-        document
-          .getElementById("foto")
-          .value = "";
-
-        document
-          .getElementById("file-name")
-          .textContent =
-          "Nenhum arquivo selecionado";
-
-      }
+.field-full {
+    grid-column: 1 / -1;
+}
 
 
-      catch (error) {
+/* =========================
+   LABEL
+========================= */
 
-        console.error(
-          "Erro ao cadastrar paciente:",
-          error
+.field label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.field label span {
+    color: #ef4444;
+
+    margin-left: 2px;
+}
+
+
+/* =========================
+   INPUT WRAPPER
+========================= */
+
+.input-wrapper {
+    position: relative;
+
+    width: 100%;
+}
+
+
+/* =========================
+   ÍCONE DO INPUT
+========================= */
+
+.input-icon {
+    position: absolute;
+
+    left: 15px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 20px;
+
+    font-size: 16px;
+
+    opacity: 0.78;
+
+    pointer-events: none;
+
+    z-index: 2;
+}
+
+
+/* =========================
+   INPUTS E SELECTS
+========================= */
+
+.input-wrapper input,
+.input-wrapper select {
+    width: 100%;
+    height: 49px;
+
+    padding: 0 15px 0 45px;
+
+    border: 1px solid #d5e1e7;
+
+    border-radius: 10px;
+
+    outline: none;
+
+    background: #f9fbfc;
+
+    color: #1e293b;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.input-wrapper input::placeholder {
+    color: #a2afb8;
+}
+
+.input-wrapper input:hover,
+.input-wrapper select:hover {
+    border-color: #b8cbd5;
+
+    background: #fff;
+}
+
+.input-wrapper input:focus,
+.input-wrapper select:focus {
+    border-color: #159bc5;
+
+    background: #fff;
+
+    box-shadow:
+        0 0 0 4px rgba(21, 155, 197, 0.10);
+}
+
+.input-wrapper select {
+    appearance: auto;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   DATA
+========================= */
+
+input[type="date"] {
+    cursor: pointer;
+}
+
+
+/* =========================
+   ARQUIVO
+========================= */
+
+.file-wrapper {
+    width: 100%;
+    height: 49px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 5px 10px;
+
+    border: 1px dashed #c8d9e1;
+
+    border-radius: 10px;
+
+    background: #f9fbfc;
+
+    transition: 0.2s ease;
+}
+
+.file-wrapper:hover {
+    border-color: #9ec8d7;
+
+    background: #fff;
+}
+
+.file-wrapper input {
+    display: none;
+}
+
+.file-button {
+    height: 37px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 15px;
+
+    border-radius: 8px;
+
+    background: #e8f6fa;
+
+    color: #126a94;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+
+    white-space: nowrap;
+}
+
+.file-button:hover {
+    background: #d6eef5;
+
+    transform: translateY(-1px);
+}
+
+#file-name {
+    min-width: 0;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    color: #8a9aa6;
+
+    font-size: 12px;
+}
+
+
+/* =========================
+   RODAPÉ
+========================= */
+
+.form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 35px;
+
+    padding-top: 24px;
+
+    border-top: 1px solid #e7eef2;
+}
+
+.required-info {
+    color: #8a9aa6;
+
+    font-size: 12px;
+}
+
+.required-info span {
+    color: #ef4444;
+
+    font-weight: bold;
+}
+
+
+/* =========================
+   BOTÃO CADASTRAR
+========================= */
+
+.register-button {
+    min-height: 49px;
+
+    padding: 0 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 9px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #159bc5,
+            #126a94
         );
 
+    color: #fff;
 
-        alert(
-          "Não foi possível cadastrar o paciente.\n\n" +
-          "Verifique se o servidor está funcionando."
-        );
+    font-family: inherit;
 
-      }
+    font-size: 14px;
+    font-weight: 700;
 
+    cursor: pointer;
+
+    box-shadow:
+        0 8px 22px rgba(18, 106, 148, 0.23);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        filter 0.2s ease;
+}
+
+.register-button:hover {
+    transform: translateY(-2px);
+
+    filter: brightness(1.04);
+
+    box-shadow:
+        0 12px 28px rgba(18, 106, 148, 0.30);
+}
+
+.register-button:active {
+    transform: translateY(0);
+
+    box-shadow:
+        0 6px 15px rgba(18, 106, 148, 0.20);
+}
+
+.register-button span {
+    font-size: 18px;
+}
+
+
+/* =========================
+   SEGURANÇA
+========================= */
+
+.security {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    margin-top: 18px;
+
+    padding: 15px 19px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(233, 247, 251, 0.85);
+
+    border: 1px solid #d4edf3;
+
+    color: #126a94;
+
+    box-shadow:
+        0 5px 18px rgba(18, 106, 148, 0.04);
+}
+
+.security > span {
+    font-size: 20px;
+}
+
+.security strong {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #126a94;
+
+    font-size: 12px;
+}
+
+.security small {
+    color: #718491;
+
+    font-size: 11px;
+
+    line-height: 1.4;
+}
+
+
+/* =========================
+   RESPONSIVO — TABLET
+========================= */
+
+@media (max-width: 800px) {
+
+    .topbar {
+        height: 70px;
+
+        padding: 0 20px;
     }
 
+    .topbar-right {
+        gap: 12px;
+    }
+
+    .status {
+        display: none;
+    }
+
+    .page {
+        padding:
+            30px 15px 50px;
+    }
+
+    .form-card {
+        padding: 27px 20px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+
+        gap: 18px;
+    }
+
+    .field-full {
+        grid-column: auto;
+    }
+
+    .page-header h1 {
+        font-size: 27px;
+    }
+
+}
 
 
-    /* =========================================
-       MÁSCARA CPF
-    ========================================== */
+/* =========================
+   RESPONSIVO — CELULAR
+========================= */
 
-    document
-      .getElementById("cpf")
-      .addEventListener(
-        "input",
-        function () {
+@media (max-width: 550px) {
 
-          let valor =
-            this.value.replace(/\D/g, "");
+    .topbar {
+        height: 64px;
 
-          valor =
-            valor.substring(0, 11);
+        padding: 0 15px;
+    }
+
+    .brand {
+        gap: 9px;
+    }
+
+    .brand-icon {
+        width: 38px;
+        height: 38px;
+
+        font-size: 18px;
+    }
+
+    .brand strong {
+        font-size: 16px;
+    }
+
+    .brand span {
+        display: none;
+    }
+
+    .user-info {
+        font-size: 0;
+    }
+
+    .user-icon {
+        width: 34px;
+        height: 34px;
+
+        font-size: 16px;
+    }
+
+    .page {
+        padding:
+            25px 12px 40px;
+    }
+
+    .page-header {
+        align-items: flex-start;
+
+        gap: 15px;
+
+        margin-bottom: 23px;
+    }
+
+    .page-header h1 {
+        font-size: 23px;
+    }
+
+    .page-header p {
+        font-size: 13px;
+
+        line-height: 1.5;
+    }
+
+    .header-icon {
+        width: 50px;
+        height: 50px;
+
+        border-radius: 14px;
+
+        font-size: 21px;
+
+        flex-shrink: 0;
+    }
+
+    .form-card {
+        padding: 22px 16px;
+
+        border-radius: 16px;
+    }
+
+    .section-space {
+        margin-top: 30px;
+    }
+
+    .section-header {
+        gap: 10px;
+    }
+
+    .section-icon {
+        width: 39px;
+        height: 39px;
+
+        font-size: 17px;
+    }
+
+    .section-header h2 {
+        font-size: 15px;
+    }
+
+    .section-header p {
+        font-size: 11px;
+    }
+
+    .form-grid {
+        padding-top: 19px;
+    }
+
+    .form-footer {
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 15px;
+    }
+
+    .register-button {
+        width: 100%;
+    }
+
+    .security {
+        align-items: flex-start;
+
+        padding: 14px;
+    }
+
+}
 
 
-          if (valor.length > 9) {
+/* =========================
+   ACESSIBILIDADE
+========================= */
 
-            valor =
-              valor.replace(
-                /(\d{3})(\d{3})(\d{3})(\d{1,2})/,
-                "$1.$2.$3-$4"
-              );
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+label:focus-visible {
+    outline: 3px solid rgba(21, 155, 197, 0.22);
 
-          }
-
-          else if (valor.length > 6) {
-
-            valor =
-              valor.replace(
-                /(\d{3})(\d{3})(\d{1,3})/,
-                "$1.$2.$3"
-              );
-
-          }
-
-          else if (valor.length > 3) {
-
-            valor =
-              valor.replace(
-                /(\d{3})(\d{1,3})/,
-                "$1.$2"
-              );
-
-          }
+    outline-offset: 2px;
+}
 
 
-          this.value = valor;
+/* =========================
+   SELEÇÃO DE TEXTO
+========================= */
 
-        }
-      );
+::selection {
+    background: rgba(21, 155, 197, 0.20);
 
-
-
-    /* =========================================
-       MÁSCARA TELEFONE
-    ========================================== */
-
-    document
-      .getElementById("telefone")
-      .addEventListener(
-        "input",
-        function () {
-
-          let valor =
-            this.value.replace(/\D/g, "");
-
-          valor =
-            valor.substring(0, 11);
-
-
-          if (valor.length > 10) {
-
-            valor =
-              valor.replace(
-                /(\d{2})(\d{5})(\d{4})/,
-                "($1) $2-$3"
-              );
-
-          }
-
-          else if (valor.length > 6) {
-
-            valor =
-              valor.replace(
-                /(\d{2})(\d{4})(\d{1,4})/,
-                "($1) $2-$3"
-              );
-
-          }
-
-          else if (valor.length > 2) {
-
-            valor =
-              valor.replace(
-                /(\d{2})(\d{1,5})/,
-                "($1) $2"
-              );
-
-          }
-
-
-          this.value = valor;
-
-        }
-      );
-
-
-
-    /* =========================================
-       NOME DO ARQUIVO
-    ========================================== */
-
-    document
-      .getElementById("foto")
-      .addEventListener(
-        "change",
-        function () {
-
-          const fileName =
-            this.files.length > 0
-              ? this.files[0].name
-              : "Nenhum arquivo selecionado";
-
-
-          document
-            .getElementById("file-name")
-            .textContent = fileName;
-
-        }
-      );
-
-  </script>
-
-</body>
-
-</html>
+    color: #123b59;
+}
