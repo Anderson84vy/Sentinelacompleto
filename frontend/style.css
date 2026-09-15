@@ -651,4 +651,813 @@ label {
     font-size: 20px;
   }
 
+}  
+
+/* =========================================================
+   MEDCORE — PAINEL MÉDICO
+   Estilos exclusivos da tela medico.html
+========================================================= */
+
+
+/* =========================================
+   PÁGINA MÉDICA
+========================================= */
+
+.medico-page {
+  min-height: 100vh;
+  height: auto;
+  overflow-y: auto;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f4f8fb 0%,
+      #eef6f9 50%,
+      #f8fafc 100%
+    );
+
+  color: #1e293b;
+}
+
+
+/* =========================================
+   CONTAINER PRINCIPAL
+========================================= */
+
+.medico-page .container {
+  width: calc(100% - 50px);
+  max-width: 1350px;
+
+  margin: 0 auto;
+
+  padding: 30px 0 50px;
+}
+
+
+/* =========================================
+   CABEÇALHO
+========================================= */
+
+.medico-page .container > div:first-child {
+  background: white;
+
+  padding: 20px 25px !important;
+
+  border-radius: 16px;
+
+  border: 1px solid #e2e8f0;
+
+  box-shadow:
+    0 6px 20px rgba(15, 23, 42, 0.06);
+
+  margin-bottom: 20px !important;
+}
+
+.medico-page .container > div:first-child h2 {
+  color: #123b59;
+
+  font-size: 25px;
+
+  font-weight: 800;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+}
+
+
+/* =========================================
+   BOTÃO ABRIR TV
+========================================= */
+
+.medico-page .btn-abrir-tv {
+  background:
+    linear-gradient(
+      135deg,
+      #159bc5,
+      #126a94
+    ) !important;
+
+  border: none !important;
+
+  padding: 11px 18px !important;
+
+  border-radius: 10px !important;
+
+  color: white !important;
+
+  font-size: 14px !important;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 5px 14px rgba(18, 106, 148, 0.22);
+
+  transition: 0.2s;
+}
+
+.medico-page .btn-abrir-tv:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 8px 20px rgba(18, 106, 148, 0.3);
+}
+
+
+/* =========================================
+   CONSULTÓRIO
+========================================= */
+
+.medico-page .consultorio-input {
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+
+  margin-bottom: 25px;
+
+  padding: 16px 20px;
+
+  background: white;
+
+  border-radius: 14px;
+
+  border: 1px solid #dbe5ec;
+
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.05);
+}
+
+.medico-page .consultorio-input label {
+  margin: 0;
+
+  color: #123b59;
+
+  font-size: 14px;
+
+  font-weight: 700;
+}
+
+.medico-page .consultorio-input input {
+  width: 70px;
+
+  height: 42px;
+
+  padding: 5px 10px;
+
+  text-align: center;
+
+  font-size: 17px;
+
+  font-weight: 800;
+
+  color: #126a94;
+
+  background: #f5fafc;
+
+  border: 1px solid #cbdde6;
+
+  border-radius: 9px;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+.medico-page .consultorio-input input:focus {
+  border-color: #159bc5;
+
+  background: white;
+
+  box-shadow:
+    0 0 0 4px rgba(21, 155, 197, 0.1);
+}
+
+.medico-page .consultorio-input span {
+  color: #64748b !important;
+
+  font-size: 13px !important;
+}
+
+
+/* =========================================
+   FILA DE PACIENTES
+========================================= */
+
+.medico-page #triagens {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(320px, 1fr)
+    );
+
+  gap: 18px;
+
+  margin-top: 10px;
+}
+
+
+/* =========================================
+   CARD DO PACIENTE
+========================================= */
+
+.medico-page #triagens .card {
+  position: relative;
+
+  background: white;
+
+  padding: 22px;
+
+  border-radius: 16px;
+
+  border: 1px solid #e2e8f0;
+
+  box-shadow:
+    0 6px 18px rgba(15, 23, 42, 0.07);
+
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    border-color 0.2s;
+
+  overflow: hidden;
+}
+
+.medico-page #triagens .card::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 0;
+
+  width: 5px;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      180deg,
+      #19a7ce,
+      #126a94
+    );
+}
+
+.medico-page #triagens .card:hover {
+  transform: translateY(-3px);
+
+  border-color: #c5dce7;
+
+  box-shadow:
+    0 12px 28px rgba(15, 23, 42, 0.1);
+}
+
+
+/* =========================================
+   NOME DO PACIENTE
+========================================= */
+
+.medico-page #triagens .card h3 {
+  margin: 0 0 17px;
+
+  color: #123b59;
+
+  font-size: 20px;
+
+  font-weight: 800;
+
+  text-transform: capitalize;
+}
+
+
+/* =========================================
+   INFORMAÇÕES DO PACIENTE
+========================================= */
+
+.medico-page #triagens .card p {
+  margin: 9px 0;
+
+  color: #475569;
+
+  font-size: 14px;
+
+  line-height: 1.45;
+}
+
+.medico-page #triagens .card p b {
+  color: #334155;
+
+  font-weight: 700;
+}
+
+
+/* =========================================
+   RISCO
+========================================= */
+
+.medico-page #triagens .card .vermelho,
+.medico-page #triagens .card .amarelo,
+.medico-page #triagens .card .verde,
+.medico-page #triagens .card .azul {
+  display: inline-flex;
+
+  align-items: center;
+
+  padding: 5px 11px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+
+  font-weight: 800;
+
+  text-transform: uppercase;
+}
+
+
+/* Vermelho */
+
+.medico-page #triagens .card .vermelho {
+  background: #fee2e2;
+
+  color: #b91c1c;
+}
+
+
+/* Amarelo */
+
+.medico-page #triagens .card .amarelo {
+  background: #fef3c7;
+
+  color: #b45309;
+}
+
+
+/* Verde */
+
+.medico-page #triagens .card .verde {
+  background: #dcfce7;
+
+  color: #15803d;
+}
+
+
+/* Azul */
+
+.medico-page #triagens .card .azul {
+  background: #dbeafe;
+
+  color: #1d4ed8;
+}
+
+
+/* =========================================
+   ÁREA DOS BOTÕES DO PACIENTE
+========================================= */
+
+.medico-page #triagens .card > div:last-child {
+  margin-top: 18px;
+
+  padding-top: 15px;
+
+  border-top: 1px solid #edf2f7;
+}
+
+
+/* =========================================
+   BOTÃO ATENDER
+========================================= */
+
+.medico-page #triagens .card > div:last-child button:first-child {
+  background:
+    linear-gradient(
+      135deg,
+      #159bc5,
+      #126a94
+    );
+
+  color: white;
+
+  border: none;
+
+  padding: 10px 16px;
+
+  border-radius: 9px;
+
+  cursor: pointer;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  box-shadow:
+    0 4px 10px rgba(18, 106, 148, 0.18);
+
+  transition: 0.2s;
+}
+
+.medico-page #triagens .card > div:last-child button:first-child:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 7px 16px rgba(18, 106, 148, 0.25);
+}
+
+
+/* =========================================
+   BOTÃO CHAMAR NA TV
+========================================= */
+
+.medico-page .btn-tv {
+  background:
+    linear-gradient(
+      135deg,
+      #16a34a,
+      #15803d
+    ) !important;
+
+  color: white !important;
+
+  border: none !important;
+
+  padding: 10px 16px !important;
+
+  border-radius: 9px !important;
+
+  cursor: pointer;
+
+  font-size: 13px !important;
+
+  font-weight: 700;
+
+  margin-top: 0 !important;
+
+  box-shadow:
+    0 4px 10px rgba(22, 163, 74, 0.18);
+
+  transition: 0.2s;
+}
+
+.medico-page .btn-tv:hover {
+  background:
+    linear-gradient(
+      135deg,
+      #15803d,
+      #166534
+    ) !important;
+
+  transform: translateY(-2px);
+}
+
+
+/* =========================================
+   LINHA SEPARADORA
+========================================= */
+
+.medico-page .container > hr {
+  border: none;
+
+  height: 1px;
+
+  background: #dbe5ec;
+
+  margin: 30px 0;
+}
+
+
+/* =========================================
+   CONSULTA
+========================================= */
+
+.medico-page .container > h3 {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-bottom: 18px;
+
+  color: #123b59;
+
+  font-size: 22px;
+
+  font-weight: 800;
+}
+
+.medico-page .container > h3::before {
+  content: "🩺";
+
+  font-size: 22px;
+}
+
+
+/* =========================================
+   FORMULÁRIO DA CONSULTA
+========================================= */
+
+.medico-page #paciente,
+.medico-page #diagnostico,
+.medico-page #medicacao,
+.medico-page #obs {
+  height: 46px;
+
+  padding: 0 14px;
+
+  border: 1px solid #d6dee7;
+
+  border-radius: 9px;
+
+  background: white;
+
+  color: #1e293b;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  font-size: 14px;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+.medico-page #paciente {
+  width: 25%;
+}
+
+.medico-page #diagnostico {
+  width: 28%;
+}
+
+.medico-page #medicacao {
+  width: 28%;
+}
+
+.medico-page #paciente:focus,
+.medico-page #diagnostico:focus,
+.medico-page #medicacao:focus,
+.medico-page #obs:focus {
+  border-color: #159bc5;
+
+  box-shadow:
+    0 0 0 4px rgba(21, 155, 197, 0.1);
+}
+
+.medico-page #paciente {
+  background: #f1f5f9;
+
+  color: #64748b;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================
+   OBSERVAÇÕES
+========================================= */
+
+.medico-page #obs {
+  width: 100%;
+
+  min-height: 100px;
+
+  margin-top: 14px;
+
+  padding: 14px;
+
+  resize: vertical;
+}
+
+
+/* =========================================
+   AÇÕES DA CONSULTA
+========================================= */
+
+.medico-page .acoes-consulta {
+  display: flex;
+
+  gap: 12px;
+
+  margin-top: 16px;
+
+  flex-wrap: wrap;
+}
+
+
+/* =========================================
+   SALVAR CONSULTA
+========================================= */
+
+.medico-page .btn-salvar {
+  background:
+    linear-gradient(
+      135deg,
+      #159bc5,
+      #126a94
+    );
+
+  color: white;
+
+  border: none;
+
+  padding: 12px 20px;
+
+  border-radius: 9px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  box-shadow:
+    0 5px 14px rgba(18, 106, 148, 0.2);
+
+  transition: 0.2s;
+}
+
+.medico-page .btn-salvar:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 8px 20px rgba(18, 106, 148, 0.3);
+}
+
+
+/* =========================================
+   DAR ALTA
+========================================= */
+
+.medico-page .btn-alta {
+  background:
+    linear-gradient(
+      135deg,
+      #16a34a,
+      #15803d
+    );
+
+  color: white;
+
+  border: none;
+
+  padding: 12px 20px;
+
+  border-radius: 9px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  box-shadow:
+    0 5px 14px rgba(22, 163, 74, 0.2);
+
+  transition: 0.2s;
+}
+
+.medico-page .btn-alta:hover:not(:disabled) {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 8px 20px rgba(22, 163, 74, 0.3);
+}
+
+.medico-page .btn-alta:disabled {
+  background: #cbd5e1;
+
+  color: #64748b;
+
+  box-shadow: none;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+
+/* =========================================
+   AVISO DE ALTA
+========================================= */
+
+.medico-page .aviso-alta {
+  margin-top: 18px;
+
+  padding: 14px 17px;
+
+  background: #f0f9fc;
+
+  border: 1px solid #d5edf4;
+
+  border-left: 4px solid #159bc5;
+
+  color: #475569;
+
+  font-size: 13px;
+
+  line-height: 1.6;
+
+  border-radius: 9px;
+}
+
+.medico-page .aviso-alta b:first-child {
+  color: #126a94;
+}
+
+
+/* =========================================
+   MENSAGEM FILA VAZIA
+========================================= */
+
+.medico-page #triagens > p {
+  grid-column: 1 / -1;
+
+  background: white;
+
+  padding: 35px;
+
+  border-radius: 14px;
+
+  border: 1px solid #e2e8f0;
+
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.05);
+
+  color: #64748b !important;
+
+  font-size: 14px;
+}
+
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media (max-width: 900px) {
+
+  .medico-page .container {
+    width: calc(100% - 30px);
+
+    padding-top: 20px;
+  }
+
+  .medico-page #triagens {
+    grid-template-columns: 1fr;
+  }
+
+  .medico-page #paciente,
+  .medico-page #diagnostico,
+  .medico-page #medicacao {
+    width: 100%;
+
+    margin-bottom: 10px;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .medico-page .container {
+    width: calc(100% - 20px);
+
+    padding-bottom: 30px;
+  }
+
+  .medico-page .container > div:first-child {
+    padding: 16px !important;
+
+    flex-direction: column !important;
+
+    align-items: stretch !important;
+
+    gap: 12px;
+  }
+
+  .medico-page .container > div:first-child h2 {
+    font-size: 21px;
+  }
+
+  .medico-page .btn-abrir-tv {
+    width: 100%;
+  }
+
+  .medico-page .consultorio-input {
+    flex-wrap: wrap;
+  }
+
+  .medico-page .consultorio-input span {
+    width: 100%;
+  }
+
+  .medico-page .acoes-consulta button {
+    width: 100%;
+  }
+
 }
