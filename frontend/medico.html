@@ -409,7 +409,6 @@
     .medico-page #paciente {
       background: #f1f5f9;
       color: #64748b;
-
       cursor: not-allowed;
     }
 
@@ -461,65 +460,6 @@
 
     .medico-page .btn-salvar:hover {
       transform: translateY(-2px);
-    }
-
-    .medico-page .btn-alta {
-      background:
-        linear-gradient(135deg, #16a34a, #15803d);
-
-      color: white;
-
-      border: none;
-
-      padding: 12px 20px;
-
-      border-radius: 9px;
-
-      cursor: pointer;
-
-      font-size: 14px;
-      font-weight: 700;
-
-      transition: 0.2s;
-    }
-
-    .medico-page .btn-alta:hover:not(:disabled) {
-      transform: translateY(-2px);
-    }
-
-    .medico-page .btn-alta:disabled {
-      background: #cbd5e1;
-
-      color: #64748b;
-
-      cursor: not-allowed;
-
-      transform: none;
-    }
-
-
-    /* AVISO DE ALTA */
-
-    .medico-page .aviso-alta {
-      margin-top: 18px;
-
-      padding: 14px 17px;
-
-      background: #f0f9fc;
-
-      border: 1px solid #d5edf4;
-      border-left: 4px solid #159bc5;
-
-      color: #475569;
-
-      font-size: 13px;
-      line-height: 1.6;
-
-      border-radius: 9px;
-    }
-
-    .medico-page .aviso-alta b:first-child {
-      color: #126a94;
     }
 
 
@@ -645,7 +585,7 @@
         placeholder="Observações"></textarea>
 
 
-      <!-- BOTÕES -->
+      <!-- BOTÃO -->
       <div class="acoes-consulta">
 
         <button
@@ -653,26 +593,6 @@
           onclick="salvar()">
           💾 Salvar Consulta
         </button>
-
-        <button
-          id="btn-alta"
-          class="btn-alta"
-          onclick="darAlta()"
-          disabled>
-          🟢 Dar Alta + Gerar PDF
-        </button>
-
-      </div>
-
-
-      <!-- AVISO -->
-      <div class="aviso-alta">
-
-        <b>📋 Alta médica:</b>
-
-        selecione um paciente, preencha o diagnóstico e a medicação.
-        Ao clicar em <b>Dar Alta + Gerar PDF</b>, o sistema registrará a alta
-        e abrirá o documento em PDF.
 
       </div>
 
@@ -866,10 +786,6 @@
         t.observacao || "";
 
 
-      document.getElementById("btn-alta").disabled =
-        false;
-
-
       if (
         t.alergia &&
         t.alergia !== "Nenhuma"
@@ -1036,197 +952,6 @@
 
 
     /* =========================================================
-       DAR ALTA + GERAR PDF
-    ========================================================= */
-
-    async function darAlta() {
-
-      const paciente =
-        document.getElementById("paciente").value.trim();
-
-      const diagnostico =
-        document.getElementById("diagnostico").value.trim();
-
-      const medicacao =
-        document.getElementById("medicacao").value.trim();
-
-      const obs =
-        document.getElementById("obs").value.trim();
-
-
-      if (!paciente) {
-
-        alert(
-          "⚠️ Selecione um paciente antes de dar alta."
-        );
-
-        return;
-      }
-
-
-      if (!diagnostico) {
-
-        alert(
-          "⚠️ Informe o diagnóstico antes de dar alta."
-        );
-
-        document
-          .getElementById("diagnostico")
-          .focus();
-
-        return;
-      }
-
-
-      if (!medicacao) {
-
-        alert(
-          "⚠️ Selecione a medicação antes de dar alta."
-        );
-
-        return;
-      }
-
-
-      const confirmar = confirm(
-
-        "⚠️ CONFIRMAR ALTA MÉDICA\n\n" +
-
-        "Paciente: " + paciente + "\n" +
-
-        "Diagnóstico: " + diagnostico + "\n" +
-
-        "Medicação: " + medicacao + "\n\n" +
-
-        "Ao confirmar, o paciente será retirado da fila " +
-        "e o documento de alta será gerado em PDF.\n\n" +
-
-        "Deseja realmente dar alta?"
-
-      );
-
-
-      if (!confirmar) {
-        return;
-      }
-
-
-      const botao =
-        document.getElementById("btn-alta");
-
-
-      botao.disabled = true;
-
-      botao.innerText =
-        "⏳ Gerando alta...";
-
-
-      try {
-
-        const resposta =
-          await fetch("/alta-paciente", {
-
-            method: "POST",
-
-            headers: {
-              "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-
-              paciente,
-              diagnostico,
-              medicacao,
-              obs
-
-            })
-
-          });
-
-
-        if (!resposta.ok) {
-
-          let mensagem =
-            "Erro ao registrar a alta.";
-
-
-          try {
-
-            const erro =
-              await resposta.json();
-
-            mensagem =
-              erro.erro ||
-              erro.message ||
-              mensagem;
-
-          } catch (_) {}
-
-
-          throw new Error(mensagem);
-
-        }
-
-
-        const blob =
-          await resposta.blob();
-
-
-        const url =
-          URL.createObjectURL(blob);
-
-
-        window.open(
-          url,
-          "_blank"
-        );
-
-
-        alert(
-          "✅ Alta médica realizada com sucesso!\n\n" +
-          "O PDF da alta foi gerado."
-        );
-
-
-        limparConsulta();
-
-        carregar();
-
-
-        setTimeout(() => {
-
-          URL.revokeObjectURL(url);
-
-        }, 60000);
-
-
-      } catch (erro) {
-
-        console.error(
-          "Erro ao gerar alta:",
-          erro
-        );
-
-
-        alert(
-          "❌ Não foi possível realizar a alta.\n\n" +
-          erro.message
-        );
-
-
-      } finally {
-
-        botao.disabled = false;
-
-        botao.innerText =
-          "🟢 Dar Alta + Gerar PDF";
-
-      }
-
-    }
-
-
-    /* =========================================================
        LIMPAR CONSULTA
     ========================================================= */
 
@@ -1243,10 +968,6 @@
 
       document.getElementById("obs").value =
         "";
-
-
-      document.getElementById("btn-alta").disabled =
-        true;
 
     }
 
