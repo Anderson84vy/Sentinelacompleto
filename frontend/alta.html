@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MEDCORE | Alta de Pacientes</title>
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+
+    /* =========================================================
+       MEDCORE — PÁGINA DE ALTA
+    ========================================================= */
+
+    .alta-page {
+      min-height: 100vh;
+      padding: 30px;
+      background:
+        linear-gradient(
+          135deg,
+          #eef8fc 0%,
+          #f8fbfd 50%,
+          #edf6fa 100%
+        );
+      font-family: Arial, sans-serif;
+    }
+
+    /* =========================================================
+       CABEÇALHO
+    ========================================================= */
+
+    .alta-header {
+      max-width: 1200px;
+      margin: 0 auto 18px;
+
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 20px 25px;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      box-shadow: 0 8px 25px rgba(0,0,0,0.07);
+    }
+
+    .alta-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .alta-title .icon {
+      width: 45px;
+      height: 45px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 12px;
+
+      background: #168db8;
+      color: white;
+
+      font-size: 22px;
+    }
+
+    .alta-title h1 {
+      margin: 0;
+      color: #173b59;
+      font-size: 24px;
+    }
+
+    .alta-title p {
+      margin: 4px 0 0;
+      color: #718096;
+      font-size: 13px;
+    }
+
+    .btn-voltar {
+      border: none;
+      background: #edf4f8;
+      color: #24506b;
+
+      padding: 11px 17px;
+      border-radius: 9px;
+
+      cursor: pointer;
+      font-weight: bold;
+
+      transition: .2s;
+    }
+
+    .btn-voltar:hover {
+      background: #dcecf4;
+      transform: translateY(-1px);
+    }
+
+
+    /* =========================================================
+       CONTAINER
+    ========================================================= */
+
+    .alta-container {
+      max-width: 1200px;
+      margin: auto;
+    }
+
+
+    /* =========================================================
+       STATUS
+    ========================================================= */
+
+    .alta-status {
+      background: white;
+      border-radius: 14px;
+      padding: 17px 22px;
+      margin-bottom: 18px;
+
+      display: flex;
+      align-items: center;
+      gap: 15px;
+
+      box-shadow: 0 6px 20px rgba(0,0,0,.06);
+
+      border-left: 5px solid #20a464;
+    }
+
+    .status-icon {
+      width: 38px;
+      height: 38px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 50%;
+
+      background: #e7f8ef;
+      color: #159957;
+
+      font-size: 18px;
+    }
+
+    .status-text strong {
+      display: block;
+      color: #203d55;
+      margin-bottom: 3px;
+    }
+
+    .status-text span {
+      font-size: 13px;
+      color: #718096;
+    }
+
+
+    /* =========================================================
+       CARD
+    ========================================================= */
+
+    .alta-card {
+      background: rgba(255,255,255,.96);
+      border-radius: 16px;
+
+      padding: 25px;
+      margin-bottom: 20px;
+
+      box-shadow: 0 8px 25px rgba(0,0,0,.07);
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+
+      border-bottom: 1px solid #e5edf2;
+    }
+
+    .card-title h2 {
+      margin: 0;
+      color: #173b59;
+      font-size: 18px;
+    }
+
+    .card-title span {
+      width: 35px;
+      height: 35px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background: #e9f5fa;
+      color: #168db8;
+
+      border-radius: 9px;
+    }
+
+
+    /* =========================================================
+       BUSCA DE PACIENTE
+    ========================================================= */
+
+    .busca-area {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+    }
+
+    .input-busca {
+      width: 100%;
+      box-sizing: border-box;
+
+      padding: 13px 15px;
+
+      border: 1px solid #d9e4ea;
+      border-radius: 9px;
+
+      outline: none;
+      font-size: 14px;
+
+      transition: .2s;
+    }
+
+    .input-busca:focus {
+      border-color: #1d94bd;
+      box-shadow: 0 0 0 3px rgba(29,148,189,.10);
+    }
+
+    .btn-buscar {
+      border: none;
+      border-radius: 9px;
+
+      padding: 0 22px;
+
+      background: #178eb8;
+      color: white;
+
+      font-weight: bold;
+      cursor: pointer;
+
+      transition: .2s;
+    }
+
+    .btn-buscar:hover {
+      background: #11799d;
+      transform: translateY(-1px);
+    }
+
+
+    /* =========================================================
+       DADOS DO PACIENTE
+    ========================================================= */
+
+    .paciente-box {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    .campo {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .campo label {
+      font-size: 12px;
+      color: #607386;
+      font-weight: bold;
+    }
+
+    .campo input,
+    .campo select,
+    .campo textarea {
+
+      width: 100%;
+      box-sizing: border-box;
+
+      padding: 12px 13px;
+
+      border: 1px solid #d9e4ea;
+      border-radius: 9px;
+
+      background: #fff;
+
+      color: #30475a;
+      font-size: 14px;
+
+      outline: none;
+
+      transition: .2s;
+    }
+
+    .campo input:focus,
+    .campo select:focus,
+    .campo textarea:focus {
+      border-color: #1d94bd;
+      box-shadow: 0 0 0 3px rgba(29,148,189,.10);
+    }
+
+    .campo textarea {
+      resize: vertical;
+      min-height: 110px;
+    }
+
+    .campo-full {
+      grid-column: 1 / -1;
+    }
+
+
+    /* =========================================================
+       DIAGNÓSTICO
+    ========================================================= */
+
+    .diagnostico-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+
+    /* =========================================================
+       ORIENTAÇÕES
+    ========================================================= */
+
+    .orientacoes-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+
+    /* =========================================================
+       ALERTA
+    ========================================================= */
+
+    .alerta-alta {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+
+      background: #fff8e7;
+      border: 1px solid #f4df9e;
+
+      border-radius: 10px;
+      padding: 14px 16px;
+
+      margin-top: 20px;
+
+      color: #725b1c;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .alerta-alta strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+
+    /* =========================================================
+       BOTÕES
+    ========================================================= */
+
+    .acoes-alta {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+
+      margin-top: 20px;
+    }
+
+    .btn-cancelar,
+    .btn-alta,
+    .btn-imprimir {
+
+      border: none;
+      border-radius: 9px;
+
+      padding: 12px 20px;
+
+      font-weight: bold;
+      cursor: pointer;
+
+      transition: .2s;
+    }
+
+    .btn-cancelar {
+      background: #edf1f4;
+      color: #526575;
+    }
+
+    .btn-imprimir {
+      background: #287da0;
+      color: white;
+    }
+
+    .btn-alta {
+      background: #159957;
+      color: white;
+    }
+
+    .btn-cancelar:hover,
+    .btn-imprimir:hover,
+    .btn-alta:hover {
+      transform: translateY(-1px);
+      filter: brightness(.95);
+    }
+
+
+    /* =========================================================
+       HISTÓRICO
+    ========================================================= */
+
+    .historico-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .historico-item {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 20px;
+
+      padding: 15px;
+
+      border: 1px solid #e3ebef;
+      border-radius: 10px;
+
+      transition: .2s;
+    }
+
+    .historico-item:hover {
+      background: #f8fbfc;
+      border-color: #cfe1e8;
+    }
+
+    .historico-paciente strong {
+      display: block;
+      color: #23435c;
+      margin-bottom: 4px;
+    }
+
+    .historico-paciente span {
+      color: #7b8995;
+      font-size: 12px;
+    }
+
+    .badge-alta {
+      background: #e5f7ed;
+      color: #16854e;
+
+      padding: 6px 10px;
+      border-radius: 20px;
+
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .historico-data {
+      color: #718096;
+      font-size: 12px;
+    }
+
+
+    /* =========================================================
+       MODAL
+    ========================================================= */
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+
+      background: rgba(15,35,50,.55);
+
+      display: none;
+      align-items: center;
+      justify-content: center;
+
+      z-index: 999;
+    }
+
+    .modal-overlay.ativo {
+      display: flex;
+    }
+
+    .modal {
+      width: min(480px, 90%);
+
+      background: white;
+      border-radius: 16px;
+
+      padding: 28px;
+
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+
+      text-align: center;
+    }
+
+    .modal-icon {
+      width: 60px;
+      height: 60px;
+
+      margin: 0 auto 15px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background: #e6f8ef;
+      color: #159957;
+
+      border-radius: 50%;
+
+      font-size: 28px;
+    }
+
+    .modal h3 {
+      color: #203d55;
+      margin-bottom: 8px;
+    }
+
+    .modal p {
+      color: #718096;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+
+    /* =========================================================
+       RESPONSIVO
+    ========================================================= */
+
+    @media (max-width: 900px) {
+
+      .paciente-box {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .diagnostico-grid,
+      .orientacoes-grid {
+        grid-template-columns: 1fr;
+      }
+
+    }
+
+
+    @media (max-width: 650px) {
+
+      .alta-page {
+        padding: 15px;
+      }
+
+      .alta-header {
+        padding: 16px;
+      }
+
+      .alta-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+
+      .busca-area {
+        grid-template-columns: 1fr;
+      }
+
+      .btn-buscar {
+        padding: 12px;
+      }
+
+      .paciente-box {
+        grid-template-columns: 1fr;
+      }
+
+      .acoes-alta {
+        flex-direction: column;
+      }
+
+      .acoes-alta button {
+        width: 100%;
+      }
+
+      .historico-item {
+        grid-template-columns: 1fr;
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+<div class="alta-page">
+
+  <!-- =====================================================
+       CABEÇALHO
+  ====================================================== -->
+
+  <header class="alta-header">
+
+    <div class="alta-title">
+
+      <div class="icon">
+        🏥
+      </div>
+
+      <div>
+        <h1>Alta de Pacientes</h1>
+        <p>MEDCORE • Sistema Hospitalar</p>
+      </div>
+
+    </div>
+
+    <button
+      class="btn-voltar"
+      onclick="voltarMedico()">
+
+      ← Voltar ao Painel Médico
+
+    </button>
+
+  </header>
+
+
+  <main class="alta-container">
+
+
+    <!-- ===================================================
+         STATUS
+    ==================================================== -->
+
+    <div class="alta-status">
+
+      <div class="status-icon">
+        ✓
+      </div>
+
+      <div class="status-text">
+
+        <strong>Registro de alta hospitalar</strong>
+
+        <span>
+          Preencha as informações abaixo para finalizar o atendimento do paciente.
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         BUSCAR PACIENTE
+    ==================================================== -->
+
+    <section class="alta-card">
+
+      <div class="card-title">
+
+        <span>🔎</span>
+
+        <h2>Selecionar paciente</h2>
+
+      </div>
+
+
+      <div class="busca-area">
+
+        <input
+          type="text"
+          id="buscaPaciente"
+          class="input-busca"
+          placeholder="Digite o nome, CPF ou código do paciente..."
+        >
+
+        <button
+          class="btn-buscar"
+          onclick="buscarPaciente()">
+
+          🔎 Buscar paciente
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         DADOS DO PACIENTE
+    ==================================================== -->
+
+    <section class="alta-card">
+
+      <div class="card-title">
+
+        <span>👤</span>
+
+        <h2>Dados do paciente</h2>
+
+      </div>
+
+
+      <div class="paciente-box">
+
+        <div class="campo">
+
+          <label>Nome completo</label>
+
+          <input
+            type="text"
+            id="nomePaciente"
+            placeholder="Nome do paciente"
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label>CPF</label>
+
+          <input
+            type="text"
+            id="cpfPaciente"
+            placeholder="000.000.000-00"
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label>Data de nascimento</label>
+
+          <input
+            type="date"
+            id="nascimentoPaciente"
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label>Data da entrada</label>
+
+          <input
+            type="date"
+            id="dataEntrada"
+          >
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         INFORMAÇÕES CLÍNICAS
+    ==================================================== -->
+
+    <section class="alta-card">
+
+      <div class="card-title">
+
+        <span>🩺</span>
+
+        <h2>Informações clínicas</h2>
+
+      </div>
+
+
+      <div class="diagnostico-grid">
+
+        <div class="campo">
+
+          <label>Diagnóstico final</label>
+
+          <input
+            type="text"
+            id="diagnostico"
+            placeholder="Informe o diagnóstico final"
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label>Condição na alta</label>
+
+          <select id="condicaoAlta">
+
+            <option value="">
+              Selecione a condição
+            </option>
+
+            <option value="estavel">
+              Estável
+            </option>
+
+            <option value="melhorado">
+              Melhorado
+            </option>
+
+            <option value="recuperado">
+              Recuperado
+            </option>
+
+            <option value="acompanhamento">
+              Necessita acompanhamento
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="campo campo-full">
+
+          <label>Resumo do atendimento</label>
+
+          <textarea
+            id="resumo"
+            placeholder="Descreva de forma resumida a evolução e o atendimento realizado..."
+          ></textarea>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         ORIENTAÇÕES
+    ==================================================== -->
+
+    <section class="alta-card">
+
+      <div class="card-title">
+
+        <span>📋</span>
+
+        <h2>Orientações para o paciente</h2>
+
+      </div>
+
+
+      <div class="orientacoes-grid">
+
+        <div class="campo">
+
+          <label>Medicamentos / prescrições</label>
+
+          <textarea
+            id="medicamentos"
+            placeholder="Informe medicamentos, doses e horários, se houver..."
+          ></textarea>
+
+        </div>
+
+
+        <div class="campo">
+
+          <label>Orientações e recomendações</label>
+
+          <textarea
+            id="orientacoes"
+            placeholder="Informe os cuidados, repouso, alimentação, retorno, etc..."
+          ></textarea>
+
+        </div>
+
+
+        <div class="campo">
+
+          <label>Retorno / acompanhamento</label>
+
+          <input
+            type="text"
+            id="retorno"
+            placeholder="Ex.: Retorno em 15 dias"
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label>Médico responsável</label>
+
+          <input
+            type="text"
+            id="medicoResponsavel"
+            placeholder="Nome do médico"
+          >
+
+        </div>
+
+      </div>
+
+
+      <div class="alerta-alta">
+
+        <div>⚠️</div>
+
+        <div>
+
+          <strong>Atenção</strong>
+
+          Confira todas as informações antes de confirmar a alta.
+          Após o registro, o atendimento será marcado como finalizado.
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           AÇÕES
+      ================================================== -->
+
+      <div class="acoes-alta">
+
+        <button
+          class="btn-cancelar"
+          onclick="limparFormulario()">
+
+          Limpar
+
+        </button>
+
+
+        <button
+          class="btn-imprimir"
+          onclick="imprimirAlta()">
+
+          🖨️ Imprimir resumo
+
+        </button>
+
+
+        <button
+          class="btn-alta"
+          onclick="abrirConfirmacao()">
+
+          ✓ Conceder Alta
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         HISTÓRICO
+    ==================================================== -->
+
+    <section class="alta-card">
+
+      <div class="card-title">
+
+        <span>📜</span>
+
+        <h2>Últimas altas registradas</h2>
+
+      </div>
+
+
+      <div
+        class="historico-lista"
+        id="historicoAltas">
+
+        <div class="historico-item">
+
+          <div class="historico-paciente">
+
+            <strong>Nenhuma alta registrada</strong>
+
+            <span>
+              O histórico aparecerá aqui após o registro das altas.
+            </span>
+
+          </div>
+
+          <span class="badge-alta">
+            —
+          </span>
+
+          <span class="historico-data">
+            —
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<!-- =======================================================
+     MODAL DE CONFIRMAÇÃO
+======================================================== -->
+
+<div
+  class="modal-overlay"
+  id="modalConfirmacao">
+
+  <div class="modal">
+
+    <div class="modal-icon">
+      ✓
+    </div>
+
+    <h3>Confirmar alta do paciente?</h3>
+
+    <p>
+      Ao confirmar, o atendimento será finalizado e
+      a alta será registrada no sistema MEDCORE.
+    </p>
+
+    <div class="modal-buttons">
+
+      <button
+        class="btn-cancelar"
+        onclick="fecharConfirmacao()">
+
+        Cancelar
+
+      </button>
+
+      <button
+        class="btn-alta"
+        onclick="confirmarAlta()">
+
+        ✓ Confirmar Alta
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+  /* =====================================================
+     VARIÁVEIS
+  ===================================================== */
+
+  let pacienteSelecionado = null;
+
+
+  /* =====================================================
+     VOLTAR AO PAINEL MÉDICO
+  ===================================================== */
+
+  function voltarMedico() {
+
+    window.location.href = "medico.html";
+
+  }
+
+
+  /* =====================================================
+     BUSCAR PACIENTE
+  ===================================================== */
+
+  function buscarPaciente() {
+
+    const busca =
+      document.getElementById("buscaPaciente").value.trim();
+
+    if (!busca) {
+
+      alert("Digite o nome, CPF ou código do paciente.");
+
+      return;
+
+    }
+
+    /*
+      Esta função está preparada para receber
+      os dados do seu backend.
+
+      Exemplo de rota:
+
+      GET /pacientes?busca=...
+    */
+
+    fetch("/pacientes?busca=" + encodeURIComponent(busca))
+
+      .then(response => {
+
+        if (!response.ok) {
+          throw new Error("Paciente não encontrado.");
+        }
+
+        return response.json();
+
+      })
+
+      .then(data => {
+
+        let paciente = data;
+
+        /*
+          Caso o backend retorne uma lista,
+          pegamos o primeiro paciente.
+        */
+
+        if (Array.isArray(data)) {
+
+          if (data.length === 0) {
+
+            throw new Error("Paciente não encontrado.");
+
+          }
+
+          paciente = data[0];
+
+        }
+
+        pacienteSelecionado = paciente;
+
+        preencherPaciente(paciente);
+
+      })
+
+      .catch(error => {
+
+        console.warn(error);
+
+        alert(
+          "Não foi possível localizar o paciente.\n\n" +
+          "Verifique o nome, CPF ou código informado."
+        );
+
+      });
+
+  }
+
+
+  /* =====================================================
+     PREENCHER DADOS
+  ===================================================== */
+
+  function preencherPaciente(paciente) {
+
+    document.getElementById("nomePaciente").value =
+      paciente.nome ||
+      paciente.nomeCompleto ||
+      "";
+
+    document.getElementById("cpfPaciente").value =
+      paciente.cpf ||
+      "";
+
+    document.getElementById("nascimentoPaciente").value =
+      paciente.nascimento ||
+      "";
+
+    document.getElementById("dataEntrada").value =
+      paciente.dataEntrada ||
+      paciente.data ||
+      "";
+
+  }
+
+
+  /* =====================================================
+     ABRIR CONFIRMAÇÃO
+  ===================================================== */
+
+  function abrirConfirmacao() {
+
+    const nome =
+      document.getElementById("nomePaciente").value.trim();
+
+    const diagnostico =
+      document.getElementById("diagnostico").value.trim();
+
+    const condicao =
+      document.getElementById("condicaoAlta").value;
+
+
+    if (!nome) {
+
+      alert("Selecione um paciente antes de conceder a alta.");
+
+      return;
+
+    }
+
+
+    if (!diagnostico) {
+
+      alert("Informe o diagnóstico final.");
+
+      return;
+
+    }
+
+
+    if (!condicao) {
+
+      alert("Selecione a condição do paciente na alta.");
+
+      return;
+
+    }
+
+
+    document
+      .getElementById("modalConfirmacao")
+      .classList.add("ativo");
+
+  }
+
+
+  /* =====================================================
+     FECHAR MODAL
+  ===================================================== */
+
+  function fecharConfirmacao() {
+
+    document
+      .getElementById("modalConfirmacao")
+      .classList.remove("ativo");
+
+  }
+
+
+  /* =====================================================
+     CONFIRMAR ALTA
+  ===================================================== */
+
+  function confirmarAlta() {
+
+    const alta = {
+
+      pacienteId:
+        pacienteSelecionado?.id || null,
+
+      paciente:
+        document.getElementById("nomePaciente").value,
+
+      cpf:
+        document.getElementById("cpfPaciente").value,
+
+      nascimento:
+        document.getElementById("nascimentoPaciente").value,
+
+      dataEntrada:
+        document.getElementById("dataEntrada").value,
+
+      diagnostico:
+        document.getElementById("diagnostico").value,
+
+      condicao:
+        document.getElementById("condicaoAlta").value,
+
+      resumo:
+        document.getElementById("resumo").value,
+
+      medicamentos:
+        document.getElementById("medicamentos").value,
+
+      orientacoes:
+        document.getElementById("orientacoes").value,
+
+      retorno:
+        document.getElementById("retorno").value,
+
+      medico:
+        document.getElementById("medicoResponsavel").value,
+
+      dataAlta:
+        new Date().toISOString()
+
+    };
+
+
+    /*
+      Envia a alta para o backend.
+
+      Rota esperada:
+
+      POST /altas
+    */
+
+    fetch("/altas", {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify(alta)
+
+    })
+
+      .then(response => {
+
+        if (!response.ok) {
+          throw new Error("Erro ao registrar alta.");
+        }
+
+        return response.json();
+
+      })
+
+      .then(() => {
+
+        fecharConfirmacao();
+
+        alert(
+          "✓ Alta registrada com sucesso!"
+        );
+
+        carregarHistorico();
+
+        limparFormulario();
+
+      })
+
+      .catch(error => {
+
+        console.error(error);
+
+        alert(
+          "Não foi possível registrar a alta.\n\n" +
+          "Verifique se a rota /altas está configurada no servidor."
+        );
+
+      });
+
+  }
+
+
+  /* =====================================================
+     LIMPAR FORMULÁRIO
+  ===================================================== */
+
+  function limparFormulario() {
+
+    pacienteSelecionado = null;
+
+    document
+      .querySelectorAll("input, textarea, select")
+      .forEach(campo => {
+
+        if (campo.id !== "buscaPaciente") {
+          campo.value = "";
+        }
+
+      });
+
+  }
+
+
+  /* =====================================================
+     IMPRIMIR ALTA
+  ===================================================== */
+
+  function imprimirAlta() {
+
+    const nome =
+      document.getElementById("nomePaciente").value;
+
+    if (!nome) {
+
+      alert("Selecione um paciente antes de imprimir.");
+
+      return;
+
+    }
+
+    window.print();
+
+  }
+
+
+  /* =====================================================
+     HISTÓRICO
+  ===================================================== */
+
+  function carregarHistorico() {
+
+    fetch("/altas")
+
+      .then(response => {
+
+        if (!response.ok) {
+          throw new Error("Erro");
+        }
+
+        return response.json();
+
+      })
+
+      .then(altas => {
+
+        const container =
+          document.getElementById("historicoAltas");
+
+        container.innerHTML = "";
+
+
+        if (!Array.isArray(altas) || altas.length === 0) {
+
+          container.innerHTML = `
+
+            <div class="historico-item">
+
+              <div class="historico-paciente">
+
+                <strong>Nenhuma alta registrada</strong>
+
+                <span>
+                  O histórico aparecerá aqui após o registro das altas.
+                </span>
+
+              </div>
+
+              <span class="badge-alta">—</span>
+
+              <span class="historico-data">—</span>
+
+            </div>
+
+          `;
+
+          return;
+
+        }
+
+
+        altas
+          .slice(-10)
+          .reverse()
+          .forEach(alta => {
+
+            const data =
+              alta.dataAlta
+                ? new Date(alta.dataAlta).toLocaleString("pt-BR")
+                : "—";
+
+
+            container.innerHTML += `
+
+              <div class="historico-item">
+
+                <div class="historico-paciente">
+
+                  <strong>
+                    ${alta.paciente || "Paciente"}
+                  </strong>
+
+                  <span>
+                    ${alta.diagnostico || "Diagnóstico não informado"}
+                  </span>
+
+                </div>
+
+                <span class="badge-alta">
+                  ALTA
+                </span>
+
+                <span class="historico-data">
+                  ${data}
+                </span>
+
+              </div>
+
+            `;
+
+          });
+
+      })
+
+      .catch(error => {
+
+        console.warn(
+          "Histórico de altas indisponível.",
+          error
+        );
+
+      });
+
+  }
+
+
+  /* =====================================================
+     INICIALIZAÇÃO
+  ===================================================== */
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+      carregarHistorico();
+
+    }
+  );
+
+
+  /* =====================================================
+     ENTER NA BUSCA
+  ===================================================== */
+
+  document
+    .getElementById("buscaPaciente")
+    .addEventListener(
+      "keydown",
+      event => {
+
+        if (event.key === "Enter") {
+
+          buscarPaciente();
+
+        }
+
+      }
+    );
+
+</script>
+
+
+<style>
+
+  /* =====================================================
+     IMPRESSÃO
+  ===================================================== */
+
+  @media print {
+
+    .alta-page {
+      background: white;
+      padding: 0;
+    }
+
+    .alta-header,
+    .alta-status,
+    .btn-voltar,
+    .busca-area,
+    .acoes-alta,
+    .historico-lista,
+    .alerta-alta {
+      display: none !important;
+    }
+
+    .alta-card {
+      box-shadow: none;
+      border: 1px solid #ddd;
+      page-break-inside: avoid;
+    }
+
+  }
+
+</style>
+
+</body>
+</html>
