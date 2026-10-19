@@ -1,4 +1,3 @@
-
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
@@ -36,21 +35,14 @@ function readDB() {
       tv_historico: []
     };
 
-    fs.writeFileSync(
-      DB_FILE,
-      JSON.stringify(inicial, null, 2),
-      "utf8"
-    );
-
+    fs.writeFileSync(DB_FILE, JSON.stringify(inicial, null, 2), "utf8");
     return inicial;
   }
 
   let db;
 
   try {
-    db = JSON.parse(
-      fs.readFileSync(DB_FILE, "utf8")
-    );
+    db = JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
   } catch (erro) {
     console.error("Erro ao ler db.json:", erro);
     throw new Error("O arquivo db.json está inválido.");
@@ -61,29 +53,18 @@ function readDB() {
   if (!Array.isArray(db.triagens)) db.triagens = [];
   if (!Array.isArray(db.consultas)) db.consultas = [];
   if (!Array.isArray(db.altas)) db.altas = [];
-
-  if (typeof db.tv_chamada === "undefined") {
-    db.tv_chamada = null;
-  }
-
-  if (!Array.isArray(db.tv_historico)) {
-    db.tv_historico = [];
-  }
+  if (typeof db.tv_chamada === "undefined") db.tv_chamada = null;
+  if (!Array.isArray(db.tv_historico)) db.tv_historico = [];
 
   return db;
 }
 
 function writeDB(db) {
-  fs.writeFileSync(
-    DB_FILE,
-    JSON.stringify(db, null, 2),
-    "utf8"
-  );
+  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf8");
 }
 
 function gerarId(prefixo = "") {
-  return prefixo + Date.now() +
-    Math.floor(Math.random() * 1000);
+  return prefixo + Date.now() + Math.floor(Math.random() * 1000);
 }
 
 function normalizarTexto(texto) {
@@ -92,6 +73,99 @@ function normalizarTexto(texto) {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim();
+}
+
+function numeroOuNulo(valor) {
+  if (valor === "" || valor === null || valor === undefined) return null;
+  const numero = Number(valor);
+  return Number.isFinite(numero) ? numero : null;
+}
+
+// =====================================================
+// MEDCORE — MOTOR DE APOIO À TRIAGEM
+// Regras demonstrativas: não substituem avaliação clínica.
+// =====================================================
+
+function analisarRisco(dados) {
+  const sintoma = normalizarTexto(dados.sintoma);
+  const temperatura = numeroOuNulo(dados.temperatura);
+  const saturacao = numeroOuNulo(dados.saturacao);
+  const pulso = numeroOuNulo(dados.pulso);
+  const respiracao = numeroOuNulo(dados.respiracao);
+
+  const sinaisEmergencia = {
+    infarto: "Suspeita de infarto",
+    avc: "Suspeita de AVC",
+    convulsao: "Convulsão",
+    hemorragia: "Hemorragia",
+    falta_ar_grave: "Falta de ar grave"
+  };
+
+  if (sinaisEmergencia[sintoma]) {
+    return {
+      risco: "vermelho",
+      motivo: sinaisEmergencia[sintoma] +
+        ". Alerta para avaliação clínica imediata."
+    };
+  }
+
+  const motivosEmergencia = [];
+
+  if (saturacao !== null && saturacao <= 90) {
+    motivosEmergencia.push("Saturação de oxigênio muito baixa");
+  }
+
+  if (respiracao !== null && (respiracao < 8 || respiracao > 30)) {
+    motivosEmergencia.push("Frequência respiratória em faixa de alerta");
+  }
+
+  if (pulso !== null && (pulso < 40 || pulso > 130)) {
+    motivosEmergencia.push("Pulso em faixa de alerta");
+  }
+
+  if (motivosEmergencia.length) {
+    return {
+      risco: "vermelho",
+      motivo: motivosEmergencia.join("; ") +
+        ". Necessária avaliação clínica imediata."
+    };
+  }
+
+  const motivosPrioritarios = [];
+
+  if (sintoma === "falta_ar_moderada") {
+    motivosPrioritarios.push("Relato de falta de ar");
+  }
+
+  if (saturacao !== null && saturacao <= 93) {
+    motivosPrioritarios.push("Saturação de oxigênio reduzida");
+  }
+
+  if (temperatura !== null && temperatura >= 39) {
+    motivosPrioritarios.push("Temperatura elevada");
+  } else if (temperatura !== null && temperatura >= 38) {
+    motivosPrioritarios.push("Febre registrada");
+  }
+
+  if (motivosPrioritarios.length) {
+    return {
+      risco: "amarelo",
+      motivo: motivosPrioritarios.join("; ") +
+        ". Confirmar prioridade conforme protocolo clínico."
+    };
+  }
+
+  if (["vomito", "diarreia", "febre"].includes(sintoma)) {
+    return {
+      risco: "amarelo",
+      motivo: "Sintoma que requer avaliação clínica e verificação de sinais de alerta."
+    };
+  }
+
+  return {
+    risco: "verde",
+    motivo: "Nenhum dos alertas programados foi identificado nos dados informados. A equipe deve avaliar o paciente e confirmar a prioridade."
+  };
 }
 
 // =====================================================
@@ -104,8 +178,7 @@ app.post("/login", (req, res) => {
     const { usuario, senha } = req.body;
 
     const encontrado = db.usuarios.find(u =>
-      u.usuario === usuario &&
-      u.senha === senha
+      u.usuario === usuario && u.senha === senha
     );
 
     if (!encontrado) {
@@ -118,6 +191,419 @@ app.post("/login", (req, res) => {
     res.json(encontrado);
   } catch (erro) {
     console.error(erro);
+    res.status(500).json({ mensagem: "Erro ao realizar login." });
+  }
+});
+
+// =====================================================
+// CADASTRO DE PACIENTES
+// =====================================================
+
+app.post("/atendimento", (req, res) => {
+  try {
+    const db = readDB();
+
+    const paciente = {
+      id: Date.now(),
+      nome: req.body.nome || req.body.nomeCompleto,
+      cpf: req.body.cpf || "",
+      mae: req.body.mae || "",
+      nascimento: req.body.nascimento || "",
+      estadoCivil: req.body.estadoCivil || "",
+      telefone: req.body.telefone || "",
+      email: req.body.email || "",
+      emergencia: req.body.emergencia || "",
+      endereco: req.body.endereco || "",
+      tipo: req.body.tipo || "",
+      status: "triagem",
+      createdAt: new Date().toISOString()
+    };
+
+    if (!paciente.nome) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Informe o nome do paciente."
+      });
+    }
+
+    db.pacientes.push(paciente);
+    writeDB(db);
+
+    res.status(201).json({
+      sucesso: true,
+      mensagem: "Paciente cadastrado com sucesso.",
+      paciente
+    });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao cadastrar paciente."
+    });
+  }
+});
+
+// =====================================================
+// LISTAR E PESQUISAR PACIENTES
+// =====================================================
+
+app.get("/pacientes", (req, res) => {
+  try {
+    const db = readDB();
+    const busca = normalizarTexto(req.query.busca || "");
+
+    let pacientes = db.pacientes;
+
+    if (busca) {
+      pacientes = pacientes.filter(p =>
+        normalizarTexto(p.nome).includes(busca) ||
+        String(p.cpf || "").includes(busca)
+      );
+    }
+
+    res.json(pacientes);
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({
+      mensagem: "Erro ao listar pacientes."
+    });
+  }
+});
+
+// =====================================================
+// ANALISAR TRIAGEM ANTES DE SALVAR
+// =====================================================
+
+app.post("/triagem/analisar", (req, res) => {
+  try {
+    const resultado = analisarRisco(req.body || {});
+
+    res.json({
+      sucesso: true,
+      risco: resultado.risco,
+      motivo: resultado.motivo
+    });
+  } catch (erro) {
+    console.error("Erro ao analisar triagem:", erro);
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Não foi possível analisar os dados da triagem."
+    });
+  }
+});
+
+// =====================================================
+// SALVAR TRIAGEM
+// =====================================================
+
+app.post("/triagem", (req, res) => {
+  try {
+    const db = readDB();
+
+    const nome = String(req.body.nome || "").trim();
+
+    if (!nome) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Informe o nome do paciente."
+      });
+    }
+
+    // O servidor calcula o risco; não confia apenas no risco enviado
+    // pelo navegador.
+    const resultadoRisco = analisarRisco(req.body);
+
+    const triagem = {
+      id: gerarId("TRI"),
+      pacienteId: req.body.pacienteId || null,
+      nome,
+      sintoma: req.body.sintoma || "",
+      temperatura: numeroOuNulo(req.body.temperatura),
+      pulso: numeroOuNulo(req.body.pulso),
+      saturacao: numeroOuNulo(req.body.saturacao),
+      respiracao: numeroOuNulo(req.body.respiracao),
+      pressao: req.body.pressao || "",
+      alergia: req.body.alergia || "",
+      observacao: req.body.observacao || "",
+      risco: resultadoRisco.risco,
+      motivoRisco: resultadoRisco.motivo,
+      status: "aguardando_medico",
+      createdAt: new Date().toISOString()
+    };
+
+    db.triagens.push(triagem);
+
+    let paciente = null;
+
+    if (triagem.pacienteId !== null) {
+      paciente = db.pacientes.find(p =>
+        String(p.id) === String(triagem.pacienteId)
+      );
+    }
+
+    if (!paciente) {
+      paciente = db.pacientes.find(p =>
+        normalizarTexto(p.nome) === normalizarTexto(nome) &&
+        p.status === "triagem"
+      );
+    }
+
+    if (paciente) {
+      paciente.status = "aguardando_medico";
+      paciente.risco = triagem.risco;
+      paciente.triagemId = triagem.id;
+    }
+
+    writeDB(db);
+
+    res.status(201).json({
+      sucesso: true,
+      mensagem: "Triagem salva com sucesso.",
+      triagem
+    });
+  } catch (erro) {
+    console.error("Erro ao salvar triagem:", erro);
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao salvar a triagem."
+    });
+  }
+});
+
+// =====================================================
+// LISTAR TRIAGENS — PRIORIDADE VISUAL
+// =====================================================
+
+app.get("/triagens", (req, res) => {
+  try {
+    const db = readDB();
+
+    const prioridade = {
+      vermelho: 1,
+      laranja: 2,
+      amarelo: 3,
+      verde: 4,
+      azul: 5
+    };
+
+    const triagens = [...db.triagens].sort((a, b) => {
+      const prioridadeA = prioridade[a.risco] || 99;
+      const prioridadeB = prioridade[b.risco] || 99;
+
+      if (prioridadeA !== prioridadeB) {
+        return prioridadeA - prioridadeB;
+      }
+
+      return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+    });
+
+    res.json(triagens);
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({
+      mensagem: "Erro ao listar triagens."
+    });
+  }
+});  const express = require("express");
+const fs = require("fs");
+const path = require("path");
+const cors = require("cors");
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// =====================================================
+// CONFIGURAÇÕES
+// =====================================================
+
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+
+// Frontend do MEDCORE
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+// =====================================================
+// BANCO DE DADOS
+// =====================================================
+
+const DB_FILE = path.join(__dirname, "db.json");
+
+function readDB() {
+  if (!fs.existsSync(DB_FILE)) {
+    const inicial = {
+      usuarios: [],
+      pacientes: [],
+      triagens: [],
+      consultas: [],
+      altas: [],
+      tv_chamada: null,
+      tv_historico: []
+    };
+
+    fs.writeFileSync(DB_FILE, JSON.stringify(inicial, null, 2), "utf8");
+    return inicial;
+  }
+
+  let db;
+
+  try {
+    db = JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
+  } catch (erro) {
+    console.error("Erro ao ler db.json:", erro);
+    throw new Error("O arquivo db.json está inválido.");
+  }
+
+  if (!Array.isArray(db.usuarios)) db.usuarios = [];
+  if (!Array.isArray(db.pacientes)) db.pacientes = [];
+  if (!Array.isArray(db.triagens)) db.triagens = [];
+  if (!Array.isArray(db.consultas)) db.consultas = [];
+  if (!Array.isArray(db.altas)) db.altas = [];
+  if (typeof db.tv_chamada === "undefined") db.tv_chamada = null;
+  if (!Array.isArray(db.tv_historico)) db.tv_historico = [];
+
+  return db;
+}
+
+function writeDB(db) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf8");
+}
+
+function gerarId(prefixo = "") {
+  return prefixo + Date.now() + Math.floor(Math.random() * 1000);
+}
+
+function normalizarTexto(texto) {
+  return String(texto || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function numeroOuNulo(valor) {
+  if (valor === "" || valor === null || valor === undefined) {
+    return null;
+  }
+
+  const numero = Number(valor);
+  return Number.isFinite(numero) ? numero : null;
+}
+
+// =====================================================
+// MEDCORE — MOTOR DE APOIO À TRIAGEM
+// Regras demonstrativas; não substituem avaliação clínica.
+// =====================================================
+
+function analisarRisco(dados) {
+  const sintoma = normalizarTexto(dados.sintoma);
+  const temperatura = numeroOuNulo(dados.temperatura);
+  const saturacao = numeroOuNulo(dados.saturacao);
+  const pulso = numeroOuNulo(dados.pulso);
+  const respiracao = numeroOuNulo(dados.respiracao);
+
+  const sinaisEmergencia = {
+    infarto: "Suspeita de infarto",
+    avc: "Suspeita de AVC",
+    convulsao: "Convulsão",
+    hemorragia: "Hemorragia",
+    falta_ar_grave: "Falta de ar grave"
+  };
+
+  if (sinaisEmergencia[sintoma]) {
+    return {
+      risco: "vermelho",
+      motivo: sinaisEmergencia[sintoma] +
+        ". Alerta para avaliação clínica imediata."
+    };
+  }
+
+  const motivosEmergencia = [];
+
+  // Limiares demonstrativos para adultos.
+  // Não utilizar como protocolo clínico sem validação profissional.
+
+  if (saturacao !== null && saturacao <= 90) {
+    motivosEmergencia.push("Saturação de oxigênio muito baixa");
+  }
+
+  if (respiracao !== null && (respiracao < 8 || respiracao > 30)) {
+    motivosEmergencia.push("Frequência respiratória em faixa de alerta");
+  }
+
+  if (pulso !== null && (pulso < 40 || pulso > 130)) {
+    motivosEmergencia.push("Pulso em faixa de alerta");
+  }
+
+  if (motivosEmergencia.length > 0) {
+    return {
+      risco: "vermelho",
+      motivo: motivosEmergencia.join("; ") +
+        ". Necessária avaliação clínica imediata."
+    };
+  }
+
+  const motivosPrioritarios = [];
+
+  if (sintoma === "falta_ar_moderada") {
+    motivosPrioritarios.push("Relato de falta de ar");
+  }
+
+  if (saturacao !== null && saturacao <= 93) {
+    motivosPrioritarios.push("Saturação de oxigênio reduzida");
+  }
+
+  if (temperatura !== null && temperatura >= 39) {
+    motivosPrioritarios.push("Temperatura elevada");
+  } else if (temperatura !== null && temperatura >= 38) {
+    motivosPrioritarios.push("Febre registrada");
+  }
+
+  if (motivosPrioritarios.length > 0) {
+    return {
+      risco: "amarelo",
+      motivo: motivosPrioritarios.join("; ") +
+        ". Confirmar prioridade conforme protocolo clínico."
+    };
+  }
+
+  if (["vomito", "diarreia", "febre"].includes(sintoma)) {
+    return {
+      risco: "amarelo",
+      motivo: "Sintoma que requer avaliação clínica e verificação de sinais de alerta."
+    };
+  }
+
+  return {
+    risco: "verde",
+    motivo: "Nenhum dos alertas programados foi identificado nos dados informados. A equipe deve avaliar o paciente e confirmar a prioridade."
+  };
+}
+
+// =====================================================
+// LOGIN
+// =====================================================
+
+app.post("/login", (req, res) => {
+  try {
+    const db = readDB();
+    const { usuario, senha } = req.body;
+
+    const encontrado = db.usuarios.find(u =>
+      u.usuario === usuario && u.senha === senha
+    );
+
+    if (!encontrado) {
+      return res.status(401).json({
+        sucesso: false,
+        mensagem: "Usuário ou senha inválidos."
+      });
+    }
+
+    res.json(encontrado);
+  } catch (erro) {
+    console.error(erro);
+
     res.status(500).json({
       mensagem: "Erro ao realizar login."
     });
@@ -165,13 +651,13 @@ app.post("/atendimento", (req, res) => {
     });
   } catch (erro) {
     console.error(erro);
+
     res.status(500).json({
+      sucesso: false,
       mensagem: "Erro ao cadastrar paciente."
     });
   }
-});
-
-// =====================================================
+});  // =====================================================
 // LISTAR E BUSCAR PACIENTES
 // =====================================================
 
@@ -200,51 +686,113 @@ app.get("/pacientes", (req, res) => {
 });
 
 // =====================================================
+// ANALISAR TRIAGEM — NÃO SALVA A TRIAGEM
+// =====================================================
+
+app.post("/triagem/analisar", (req, res) => {
+  try {
+    const dados = req.body;
+
+    if (!dados.nome || !dados.sintoma) {
+      return res.status(400).json({
+        mensagem: "Informe o nome e o sintoma do paciente."
+      });
+    }
+
+    const resultado = analisarRisco(dados);
+
+    res.json({
+      sucesso: true,
+      risco: resultado.risco,
+      motivo: resultado.motivo,
+      tipo: "apoio_automatizado",
+      aviso: "Sugestão automatizada. A equipe clínica deve validar a prioridade."
+    });
+  } catch (erro) {
+    console.error("Erro na análise da triagem:", erro);
+
+    res.status(500).json({
+      mensagem: "Não foi possível analisar os dados da triagem."
+    });
+  }
+});
+
+// =====================================================
 // REGISTRAR TRIAGEM
 // =====================================================
 
 app.post("/triagem", (req, res) => {
   try {
     const db = readDB();
+    const dados = req.body;
 
-    const temperatura =
-      req.body.temperatura === "" ||
-      req.body.temperatura === undefined ||
-      req.body.temperatura === null
-        ? null
-        : Number(req.body.temperatura);
+    if (!dados.nome || !dados.sintoma) {
+      return res.status(400).json({
+        mensagem: "Informe o nome e o sintoma do paciente."
+      });
+    }
 
-    let risco = req.body.risco || "verde";
+    const dadosClinicos = {
+      ...dados,
+      temperatura: numeroOuNulo(dados.temperatura),
+      pulso: numeroOuNulo(dados.pulso),
+      saturacao: numeroOuNulo(dados.saturacao),
+      respiracao: numeroOuNulo(dados.respiracao)
+    };
 
-    if (temperatura !== null && !Number.isNaN(temperatura)) {
-      if (temperatura >= 39) {
-        risco = "vermelho";
-      } else if (temperatura >= 38) {
-        risco = "amarelo";
+    // O servidor calcula o risco novamente.
+    const resultado = analisarRisco(dadosClinicos);
+
+    let paciente = null;
+
+    if (dados.pacienteId) {
+      paciente = db.pacientes.find(p =>
+        String(p.id) === String(dados.pacienteId)
+      );
+
+      if (!paciente) {
+        return res.status(404).json({
+          mensagem: "Paciente cadastrado não encontrado."
+        });
+      }
+    } else {
+      const encontrados = db.pacientes.filter(p =>
+        normalizarTexto(p.nome) === normalizarTexto(dados.nome) &&
+        p.status === "triagem"
+      );
+
+      if (encontrados.length === 1) {
+        paciente = encontrados[0];
+      } else if (encontrados.length > 1) {
+        return res.status(409).json({
+          mensagem: "Existem pacientes com esse nome. Selecione o cadastro correto."
+        });
       }
     }
 
+    const nomePaciente = paciente
+      ? paciente.nome
+      : dadosClinicos.nome;
+
     const triagem = {
-      id: Date.now(),
-      pacienteId: req.body.pacienteId || null,
-      nome: req.body.nome || "",
-      sintoma: req.body.sintoma || "",
-      temperatura,
-      alergia: req.body.alergia || "",
-      observacao: req.body.observacao || "",
-      risco,
+      id: gerarId("TRI"),
+      pacienteId: paciente ? paciente.id : null,
+      nome: nomePaciente,
+      sintoma: dadosClinicos.sintoma,
+      temperatura: dadosClinicos.temperatura,
+      pulso: dadosClinicos.pulso,
+      saturacao: dadosClinicos.saturacao,
+      respiracao: dadosClinicos.respiracao,
+      pressao: dadosClinicos.pressao || "",
+      alergia: dadosClinicos.alergia || "",
+      observacao: dadosClinicos.observacao || "",
+      risco: resultado.risco,
+      motivoRisco: resultado.motivo,
       status: "aguardando_medico",
       createdAt: new Date().toISOString()
     };
 
     db.triagens.push(triagem);
-
-    const paciente = db.pacientes.find(p =>
-      triagem.pacienteId
-        ? String(p.id) === String(triagem.pacienteId)
-        : normalizarTexto(p.nome) ===
-          normalizarTexto(triagem.nome)
-    );
 
     if (paciente) {
       paciente.status = "aguardando_medico";
@@ -258,7 +806,8 @@ app.post("/triagem", (req, res) => {
       triagem
     });
   } catch (erro) {
-    console.error(erro);
+    console.error("Erro ao registrar triagem:", erro);
+
     res.status(500).json({
       mensagem: "Erro ao registrar triagem."
     });
@@ -266,20 +815,38 @@ app.post("/triagem", (req, res) => {
 });
 
 // =====================================================
-// LISTAR TRIAGENS PENDENTES
+// LISTAR TRIAGENS PENDENTES POR PRIORIDADE
 // =====================================================
 
 app.get("/triagens", (req, res) => {
   try {
     const db = readDB();
 
-    res.json(
-      db.triagens.filter(t =>
-        t.status === "aguardando_medico"
-      )
-    );
+    const ordem = {
+      vermelho: 1,
+      laranja: 2,
+      amarelo: 3,
+      verde: 4,
+      azul: 5
+    };
+
+    const triagens = db.triagens
+      .filter(t => t.status === "aguardando_medico")
+      .sort((a, b) => {
+        const prioridadeA = ordem[a.risco] || 99;
+        const prioridadeB = ordem[b.risco] || 99;
+
+        if (prioridadeA !== prioridadeB) {
+          return prioridadeA - prioridadeB;
+        }
+
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      });
+
+    res.json(triagens);
   } catch (erro) {
     console.error(erro);
+
     res.status(500).json({
       mensagem: "Erro ao listar triagens."
     });
@@ -307,7 +874,6 @@ app.post("/tv/chamar", (req, res) => {
 
     db.tv_chamada = chamada;
     db.tv_historico.unshift(chamada);
-
     db.tv_historico = db.tv_historico.slice(0, 5);
 
     writeDB(db);
@@ -318,6 +884,7 @@ app.post("/tv/chamar", (req, res) => {
     });
   } catch (erro) {
     console.error(erro);
+
     res.status(500).json({
       mensagem: "Erro ao chamar paciente."
     });
@@ -338,6 +905,7 @@ app.get("/tv/chamada", (req, res) => {
     });
   } catch (erro) {
     console.error(erro);
+
     res.status(500).json({
       mensagem: "Erro ao consultar chamadas."
     });
@@ -345,7 +913,7 @@ app.get("/tv/chamada", (req, res) => {
 });
 
 // =====================================================
-// MEDICAÇÕES
+// LISTA DE MEDICAÇÕES
 // =====================================================
 
 app.get("/lista-medicacoes", (req, res) => {
@@ -398,6 +966,7 @@ app.post("/consulta", (req, res) => {
     });
   } catch (erro) {
     console.error(erro);
+
     res.status(500).json({
       mensagem: "Erro ao registrar consulta."
     });
@@ -414,13 +983,12 @@ app.get("/medicacoes", (req, res) => {
     res.json(db.consultas);
   } catch (erro) {
     console.error(erro);
+
     res.status(500).json({
       mensagem: "Erro ao listar medicações."
     });
   }
-});
-
-// =====================================================
+}); // =====================================================
 // FUNÇÕES PARA O PDF
 // =====================================================
 
@@ -520,7 +1088,10 @@ function gerarPDFAlta(alta) {
   }
 
   adicionarObjeto("<< /Type /Catalog /Pages 2 0 R >>");
-  adicionarObjeto("<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
+
+  adicionarObjeto(
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>"
+  );
 
   adicionarObjeto(
     "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] " +
@@ -559,8 +1130,7 @@ function gerarPDFAlta(alta) {
   pdf += "0000000000 65535 f \n";
 
   for (let i = 1; i <= objetos.length; i++) {
-    pdf += String(offsets[i]).padStart(10, "0");
-    pdf += " 00000 n \n";
+    pdf += String(offsets[i]).padStart(10, "0") + " 00000 n \n";
   }
 
   pdf += `trailer\n<< /Size ${objetos.length + 1} /Root 1 0 R >>\n`;
@@ -772,12 +1342,10 @@ app.get("/alta/:id/pdf", (req, res) => {
     const pdf = gerarPDFAlta(alta);
 
     res.setHeader("Content-Type", "application/pdf");
-
     res.setHeader(
       "Content-Disposition",
       `inline; filename="alta-${alta.pacienteId}.pdf"`
     );
-
     res.setHeader("Content-Length", pdf.length);
 
     res.end(pdf);
