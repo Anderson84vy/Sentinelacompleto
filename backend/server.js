@@ -404,24 +404,7 @@ app.get("/triagens", (req, res) => {
       mensagem: "Erro ao listar triagens."
     });
   }
-});  const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const cors = require("cors");
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// =====================================================
-// CONFIGURAÇÕES
-// =====================================================
-
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
-app.use(cors());
-
-// Frontend do MEDCORE
-app.use(express.static(path.join(__dirname, "../frontend")));
+});  
 
 // =====================================================
 // BANCO DE DADOS
