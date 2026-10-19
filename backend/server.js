@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // ============================================================
 // CONFIGURAÇÕES
@@ -19,8 +19,155 @@ app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Frontend
-app.use(express.static(path.join(__dirname, "frontend")));
+// Frontend (a pasta front-end fica na raiz do projeto, fora de backend)
+const FRONTEND_DIR = path.join(__dirname, "..", "front-end");
+app.use(express.static(FRONTEND_DIR));
+
+// ============================================================
+// BANCO DE DADOS JSON
+// ============================================================
+
+const DB_PATH = path.join(__dirname, "db.json");
+
+function carregarDB() {
+    try {
+        if (!fs.existsSync(DB_PATH)) {
+            const bancoInicial = {
+                usuarios: [],
+                pacientes: [],
+                triagens: [],
+                consultas: [],
+                medicacoes: [],
+                tv_chamada: null,
+                tv_historico: [],
+                altas: []
+            };
+
+            fs.writeFileSync(
+                DB_PATH,
+                JSON.stringify(bancoInicial, null, 2),
+                "utf8"
+            );
+
+            return bancoInicial;
+        }
+
+        const dados = fs.readFileSync(DB_PATH, "utf8");
+
+        if (!dados.trim()) {
+            return {
+                usuarios: [],
+                pacientes: [],
+                triagens: [],
+                consultas: [],
+                medicacoes: [],
+                tv_chamada: null,
+                tv_historico: [],
+                altas: []
+            };
+        }
+
+        const db = JSON.parse(dados);
+
+        // Garante que todas as tabelas existam
+        db.usuarios = Array.isArray(db.usuarios) ? db.usuarios : [];
+        db.pacientes = Array.isArray(db.pacientes) ? db.pacientes : [];
+        db.triagens = Array.isArray(db.triagens) ? db.triagens : [];
+        db.consultas = Array.isArray(db.consultas) ? db.consultas : [];
+        db.medicacoes = Array.isArray(db.medicacoes) ? db.medicacoes : [];
+        db.tv_historico = Array.isArray(db.tv_historico)
+            ? db.tv_historico
+            : [];
+        db.altas = Array.isArray(db.altas) ? db.altas : [];
+
+        if (!("tv_chamada" in db)) {
+            db.tv_chamada = null;
+        }
+
+        return db;
+    } catch (erro) {
+        console.error("Erro ao carregar o banco de dados:", erro);
+
+        return {
+            usuarios: [],
+            pacientes: [],
+            triagens: [],
+            consultas: [],
+            medicacoes: [],
+            tv_chamada: null,
+            tv_historico: [],
+            altas: []
+        };
+    }
+}
+
+function salvarDB(db) {
+    try {
+        fs.writeFileSync(
+            DB_PATH,
+            JSON.stringify(db, null, 2),
+            "utf8"
+        );
+
+        return true;
+    } catch (erro) {
+        console.error("Erro ao salvar o banco de dados:", erro);
+        return false;
+    }
+}
+
+let db = carregarDB();
+
+// ============================================================
+// FUNÇÕES AUXILIARES
+// ============================================================
+
+function gerarId() {
+    return Date.now().toString() + Math.floor(Math.random() * 1000);
+}
+
+function dataHoraAtual() {
+    return new Date().toISOString();
+}
+
+function normalizarTexto(texto) {
+    return String(texto || "").trim().toLowerCase();
+}
+
+function buscarPacientePorId(id) {
+    return db.pacientes.find(
+        paciente => String(paciente.id) === String(id)
+    );
+}
+
+function buscarUsuarioPorLogin(login) {
+    return db.usuarios.find(
+        usuario => normalizarTexto(usuario.login) === normalizarTexto(login)
+    );
+}        // ============================================================
+// MEDCORE — SISTEMA HOSPITALAR
+// SERVER.JS
+// ============================================================
+
+const express = require("express");
+const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// ============================================================
+// CONFIGURAÇÕES
+// ============================================================
+
+app.use(cors());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
+
+// Frontend (a pasta front-end fica na raiz do projeto, fora de backend)
+const FRONTEND_DIR = path.join(__dirname, "..", "front-end");
+app.use(express.static(FRONTEND_DIR));
 
 // ============================================================
 // BANCO DE DADOS JSON
@@ -175,9 +322,18 @@ function formatarHora(data) {
 // ============================================================
 
 app.get("/", (req, res) => {
-    res.sendFile(
-        path.join(__dirname, "frontend", "index.html")
-    );
+    const indexPath = path.join(FRONTEND_DIR, "index.html");
+
+    if (!fs.existsSync(indexPath)) {
+        console.error("Arquivo não encontrado:", indexPath);
+        return res.status(500).json({
+            sucesso: false,
+            mensagem: "Arquivo index.html não encontrado.",
+            caminhoProcurado: indexPath
+        });
+    }
+
+    return res.sendFile(indexPath);
 });
 
 // ============================================================
@@ -247,8 +403,7 @@ app.post("/atendimento", (req, res) => {
             contatoEmergencia,
             endereco,
             email,
-            telefone
-        } = req.body;
+            telefone         } = req.body;
 
         const nomePaciente = nomeCompleto || nome;
 
@@ -308,19 +463,13 @@ app.get("/pacientes", (req, res) => {
 
         if (busca) {
             pacientes = pacientes.filter((paciente) => {
-
                 const nome = normalizarTexto(
                     paciente.nome ||
                     paciente.nomeCompleto
                 );
 
-                const cpf = normalizarTexto(
-                    paciente.cpf
-                );
-
-                const id = normalizarTexto(
-                    paciente.id
-                );
+                const cpf = normalizarTexto(paciente.cpf);
+                const id = normalizarTexto(paciente.id);
 
                 return (
                     nome.includes(busca) ||
@@ -330,7 +479,11 @@ app.get("/pacientes", (req, res) => {
             });
         }
 
-        res.json(pacientes);
+        res.json({
+            sucesso: true,
+            total: pacientes.length,
+            pacientes
+        });
 
     } catch (erro) {
         console.error("Erro ao buscar pacientes:", erro);
@@ -343,13 +496,13 @@ app.get("/pacientes", (req, res) => {
 });
 
 // ============================================================
-// BUSCAR UM PACIENTE PELO ID
+// BUSCAR PACIENTE POR ID
 // ============================================================
 
 app.get("/pacientes/:id", (req, res) => {
     try {
         const paciente = db.pacientes.find(
-            (p) => String(p.id) === String(req.params.id)
+            p => String(p.id) === String(req.params.id)
         );
 
         if (!paciente) {
@@ -359,7 +512,10 @@ app.get("/pacientes/:id", (req, res) => {
             });
         }
 
-        res.json(paciente);
+        res.json({
+            sucesso: true,
+            paciente
+        });
 
     } catch (erro) {
         console.error("Erro ao buscar paciente:", erro);
@@ -369,9 +525,7 @@ app.get("/pacientes/:id", (req, res) => {
             mensagem: "Erro ao buscar paciente."
         });
     }
-});
-
-// ============================================================
+}); // ============================================================
 // TRIAGEM
 // ============================================================
 
@@ -415,7 +569,6 @@ app.post("/triagem", (req, res) => {
         }
 
         let classificacao = prioridade || "Normal";
-
         const temp = parseFloat(temperatura);
 
         if (!isNaN(temp)) {
@@ -438,7 +591,7 @@ app.post("/triagem", (req, res) => {
             observacoes: observacoes || "",
             prioridade: classificacao,
             status: "aguardando",
-            createdAt: dataAtualISO()
+            createdAt: dataHoraAtual()
         };
 
         db.triagens.push(novaTriagem);
@@ -516,8 +669,7 @@ app.post("/tv/chamar", (req, res) => {
             const busca = normalizarTexto(paciente);
 
             pacienteEncontrado = db.pacientes.find(
-                (p) =>
-                    normalizarTexto(p.nome).includes(busca)
+                (p) => normalizarTexto(p.nome).includes(busca)
             );
         }
 
@@ -534,11 +686,10 @@ app.post("/tv/chamar", (req, res) => {
             consultorio: consultorio || "01",
             medico: medico || "",
             status: "chamando",
-            createdAt: dataAtualISO()
+            createdAt: dataHoraAtual()
         };
 
         db.tv_chamada = chamada;
-
         db.tv_historico.unshift(chamada);
 
         salvarDB();
@@ -565,9 +716,7 @@ app.post("/tv/chamar", (req, res) => {
 
 app.get("/tv/chamada", (req, res) => {
     try {
-        res.json(
-            db.tv_chamada || null
-        );
+        res.json(db.tv_chamada || null);
 
     } catch (erro) {
         console.error("Erro ao consultar chamada:", erro);
@@ -613,10 +762,7 @@ app.get("/lista-medicacoes", (req, res) => {
         res.json(db.medicacoes);
 
     } catch (erro) {
-        console.error(
-            "Erro ao buscar medicamentos:",
-            erro
-        );
+        console.error("Erro ao buscar medicamentos:", erro);
 
         res.status(500).json({
             sucesso: false,
@@ -653,7 +799,7 @@ app.post("/medicacoes", (req, res) => {
             dosagem: dosagem || "",
             quantidade: quantidade || "",
             observacoes: observacoes || "",
-            createdAt: dataAtualISO()
+            createdAt: dataHoraAtual()
         };
 
         db.medicacoes.push(medicacao);
@@ -667,10 +813,7 @@ app.post("/medicacoes", (req, res) => {
         });
 
     } catch (erro) {
-        console.error(
-            "Erro ao cadastrar medicação:",
-            erro
-        );
+        console.error("Erro ao cadastrar medicação:", erro);
 
         res.status(500).json({
             sucesso: false,
@@ -712,7 +855,7 @@ app.post("/consulta", (req, res) => {
             observacoes: observacoes || "",
             prescricao: prescricao || "",
             status: "realizada",
-            createdAt: dataAtualISO()
+            createdAt: dataHoraAtual()
         };
 
         db.consultas.push(consulta);
@@ -726,10 +869,7 @@ app.post("/consulta", (req, res) => {
         });
 
     } catch (erro) {
-        console.error(
-            "Erro ao registrar consulta:",
-            erro
-        );
+        console.error("Erro ao registrar consulta:", erro);
 
         res.status(500).json({
             sucesso: false,
@@ -744,440 +884,17 @@ app.post("/consulta", (req, res) => {
 
 app.get("/consultas", (req, res) => {
     try {
-        res.json(
-            [...db.consultas].reverse()
-        );
+        res.json([...db.consultas].reverse());
 
     } catch (erro) {
-        console.error(
-            "Erro ao buscar consultas:",
-            erro
-        );
+        console.error("Erro ao buscar consultas:", erro);
 
         res.status(500).json({
             sucesso: false,
             mensagem: "Erro ao buscar consultas."
         });
     }
-}); 
-// ============================================================
-// FUNÇÕES PARA PDF
-// ============================================================
-
-function escaparPDF(texto) {
-    if (texto === null || texto === undefined) {
-        return "";
-    }
-
-    return String(texto)
-        .replace(/\\/g, "\\\\")
-        .replace(/\(/g, "\\(")
-        .replace(/\)/g, "\\)");
-}
-
-function removerAcentos(texto) {
-    if (texto === null || texto === undefined) {
-        return "";
-    }
-
-    return String(texto)
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
-}
-
-function quebrarTexto(texto, tamanho = 85) {
-    texto = removerAcentos(texto || "");
-
-    const palavras = texto.split(/\s+/);
-    const linhas = [];
-
-    let linha = "";
-
-    palavras.forEach((palavra) => {
-
-        const tentativa =
-            (linha + " " + palavra).trim();
-
-        if (tentativa.length <= tamanho) {
-            linha = tentativa;
-        } else {
-
-            if (linha) {
-                linhas.push(linha);
-            }
-
-            linha = palavra;
-        }
-    });
-
-    if (linha) {
-        linhas.push(linha);
-    }
-
-    return linhas;
-}
-
-// ============================================================
-// GERAR PDF DA ALTA
-// ============================================================
-
-function gerarPDFAlta(alta) {
-
-    const objetos = [];
-
-    function adicionarObjeto(conteudo) {
-        objetos.push(conteudo);
-        return objetos.length;
-    }
-
-    const linhas = [];
-
-    // --------------------------------------------------------
-    // CABEÇALHO
-    // --------------------------------------------------------
-
-    linhas.push({
-        texto: "MEDCORE",
-        tamanho: 22,
-        bold: true,
-        centralizado: true
-    });
-
-    linhas.push({
-        texto: "SISTEMA HOSPITALAR",
-        tamanho: 10,
-        bold: false,
-        centralizado: true
-    });
-
-    linhas.push({
-        texto: "",
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto: "TERMO DE ALTA MEDICA",
-        tamanho: 16,
-        bold: true,
-        centralizado: true
-    });
-
-    linhas.push({
-        texto: "",
-        tamanho: 10
-    });
-
-    // --------------------------------------------------------
-    // DADOS DO PACIENTE
-    // --------------------------------------------------------
-
-    linhas.push({
-        texto: "DADOS DO PACIENTE",
-        tamanho: 12,
-        bold: true
-    });
-
-    linhas.push({
-        texto:
-            "Nome completo: " +
-            (alta.paciente || "Nao informado"),
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto:
-            "CPF: " +
-            (alta.cpf || "Nao informado"),
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto:
-            "Nome da mae: " +
-            (alta.mae || "Nao informado"),
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto:
-            "Data de nascimento: " +
-            (alta.nascimento || "Nao informado"),
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto:
-            "Estado civil: " +
-            (alta.estadoCivil || "Nao informado"),
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto:
-            "Telefone: " +
-            (alta.telefone || "Nao informado"),
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto:
-            "E-mail: " +
-            (alta.email || "Nao informado"),
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto:
-            "Endereco: " +
-            (alta.endereco || "Nao informado"),
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto: "",
-        tamanho: 10
-    });
-
-    // --------------------------------------------------------
-    // DADOS DO ATENDIMENTO
-    // --------------------------------------------------------
-
-    linhas.push({
-        texto: "DADOS DO ATENDIMENTO",
-        tamanho: 12,
-        bold: true
-    });
-
-    linhas.push({
-        texto:
-            "Data da alta: " +
-            (alta.data || "Nao informado"),
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto:
-            "Horario da alta: " +
-            (alta.hora || "Nao informado"),
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto:
-            "Status: ALTA MEDICA",
-        tamanho: 10,
-        bold: true
-    });
-
-    linhas.push({
-        texto:
-            "Condicao na alta: " +
-            (alta.condicao || "Nao informado"),
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto: "",
-        tamanho: 10
-    });
-
-    // --------------------------------------------------------
-    // DIAGNÓSTICO
-    // --------------------------------------------------------
-
-    linhas.push({
-        texto: "DIAGNOSTICO",
-        tamanho: 12,
-        bold: true
-    });
-
-    quebrarTexto(
-        alta.diagnostico ||
-        "Nao informado"
-    ).forEach((texto) => {
-
-        linhas.push({
-            texto,
-            tamanho: 10
-        });
-    });
-
-    linhas.push({
-        texto: "",
-        tamanho: 10
-    });
-
-    // --------------------------------------------------------
-    // RESUMO DO ATENDIMENTO
-    // --------------------------------------------------------
-
-    linhas.push({
-        texto: "RESUMO DO ATENDIMENTO",
-        tamanho: 12,
-        bold: true
-    });
-
-    quebrarTexto(
-        alta.resumo ||
-        "Nenhum resumo informado."
-    ).forEach((texto) => {
-
-        linhas.push({
-            texto,
-            tamanho: 10
-        });
-    });
-
-    linhas.push({
-        texto: "",
-        tamanho: 10
-    });
-
-    // --------------------------------------------------------
-    // MEDICAÇÕES
-    // --------------------------------------------------------
-
-    linhas.push({
-        texto: "MEDICACAO / PRESCRICOES",
-        tamanho: 12,
-        bold: true
-    });
-
-    quebrarTexto(
-        alta.medicacao ||
-        "Nenhuma"
-    ).forEach((texto) => {
-
-        linhas.push({
-            texto,
-            tamanho: 10
-        });
-    });
-
-    linhas.push({
-        texto: "",
-        tamanho: 10
-    });
-
-    // --------------------------------------------------------
-    // ORIENTAÇÕES
-    // --------------------------------------------------------
-
-    linhas.push({
-        texto: "ORIENTACOES",
-        tamanho: 12,
-        bold: true
-    });
-
-    quebrarTexto(
-        alta.orientacoes ||
-        "Nenhuma orientacao registrada."
-    ).forEach((texto) => {
-
-        linhas.push({
-            texto,
-            tamanho: 10
-        });
-    });
-
-    linhas.push({
-        texto: "",
-        tamanho: 10
-    });
-
-    // --------------------------------------------------------
-    // RETORNO
-    // --------------------------------------------------------
-
-    linhas.push({
-        texto:
-            "Retorno / acompanhamento: " +
-            (alta.retorno || "Nao informado"),
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto:
-            "Medico responsavel: " +
-            (alta.medico || "Nao informado"),
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto: "",
-        tamanho: 10
-    });
-
-    // --------------------------------------------------------
-    // TEXTO FINAL
-    // --------------------------------------------------------
-
-    quebrarTexto(
-        "Declara-se, para os devidos fins, que o paciente acima identificado recebeu alta medica apos avaliacao e conclusao do atendimento."
-    ).forEach((texto) => {
-
-        linhas.push({
-            texto,
-            tamanho: 10
-        });
-    });
-
-    linhas.push({
-        texto: "",
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto:
-            "________________________________________",
-        tamanho: 10,
-        centralizado: true
-    });
-
-    linhas.push({
-        texto:
-            "Assinatura do medico responsavel",
-        tamanho: 10,
-        centralizado: true
-    });
-
-    linhas.push({
-        texto: "",
-        tamanho: 10
-    });
-
-    linhas.push({
-        texto:
-            "Documento gerado automaticamente pelo sistema MEDCORE.",
-        tamanho: 8,
-        centralizado: true
-    });
-
-    linhas.push({
-        texto:
-            "Data de emissao: " +
-            (alta.data || "") +
-            " as " +
-            (alta.hora || ""),
-        tamanho: 8,
-        centralizado: true
-    });
-
-    // ========================================================
-    // CONTEÚDO DO PDF
-    // ========================================================
-
-    let conteudo = "";
-    let y = 800;
-
-    linhas.forEach((linha) => {
-
-        const texto =
-            escaparPDF(
-                removerAcentos(linha.texto)
-            );
-
-        const tamanho =
+});                 const tamanho =
             linha.tamanho || 10;
 
         const fonte =
@@ -1476,8 +1193,7 @@ app.post("/alta-paciente", (req, res) => {
         if (!paciente) {
 
             return res.status(404).json({
-                sucesso: false,
-                mensagem:
+                sucesso: false,                  mensagem:
                     "Paciente não encontrado no sistema."
             });
         }
@@ -1727,6 +1443,20 @@ app.post("/alta-paciente", (req, res) => {
                         ) ===
                         normalizarTexto(
                             paciente.nome ||
+                            paciente.nomeCompleto ||
+                            ""
+                        );
+
+                    return !(
+                        mesmoPaciente ||
+                        mesmoNome
+                    );
+                } 
+            );                            normalizarTexto(
+                            triagem.paciente
+                        ) ===
+                        normalizarTexto(
+                            paciente.nome ||
                             paciente.nomeCompleto
                         );
 
@@ -1743,9 +1473,9 @@ app.post("/alta-paciente", (req, res) => {
                 }
             );
 
-        // ----------------------------------------------------
-        // SALVAR
-        // ----------------------------------------------------
+// ----------------------------------------------------
+// SALVAR
+// ----------------------------------------------------
 
         const salvo =
             salvarDB();
@@ -1759,9 +1489,9 @@ app.post("/alta-paciente", (req, res) => {
             });
         }
 
-        // ----------------------------------------------------
-        // RESPOSTA
-        // ----------------------------------------------------
+// ----------------------------------------------------
+// RESPOSTA
+// ----------------------------------------------------
 
         return res.status(201).json({
 
