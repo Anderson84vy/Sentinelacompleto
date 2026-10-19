@@ -1,7 +1,3 @@
-// ============================================================
-// MEDCORE — SISTEMA HOSPITALAR
-// SERVER.JS
-// ============================================================
 
 const express = require("express");
 const cors = require("cors");
@@ -12,328 +8,153 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ============================================================
-// CONFIGURAÇÕES
+// MEDCORE — CONFIGURAÇÃO
 // ============================================================
 
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Frontend (a pasta front-end fica na raiz do projeto, fora de backend)
-const FRONTEND_DIR = path.join(__dirname, "..", "front-end");
-app.use(express.static(FRONTEND_DIR));
+// Aceita tanto frontend/ ao lado de backend/ quanto
+// backend/frontend/, caso essa seja a estrutura do projeto.
+const FRONTEND_CANDIDATOS = [
+  path.resolve(__dirname, "../frontend"),
+  path.resolve(__dirname, "frontend"),
+  path.resolve(process.cwd(), "frontend")
+];
 
-// ============================================================
-// BANCO DE DADOS JSON
-// ============================================================
-
-const DB_PATH = path.join(__dirname, "db.json");
-
-function carregarDB() {
-    try {
-        if (!fs.existsSync(DB_PATH)) {
-            const bancoInicial = {
-                usuarios: [],
-                pacientes: [],
-                triagens: [],
-                consultas: [],
-                medicacoes: [],
-                tv_chamada: null,
-                tv_historico: [],
-                altas: []
-            };
-
-            fs.writeFileSync(
-                DB_PATH,
-                JSON.stringify(bancoInicial, null, 2),
-                "utf8"
-            );
-
-            return bancoInicial;
-        }
-
-        const dados = fs.readFileSync(DB_PATH, "utf8");
-
-        if (!dados.trim()) {
-            return {
-                usuarios: [],
-                pacientes: [],
-                triagens: [],
-                consultas: [],
-                medicacoes: [],
-                tv_chamada: null,
-                tv_historico: [],
-                altas: []
-            };
-        }
-
-        const db = JSON.parse(dados);
-
-        // Garante que todas as tabelas existam
-        db.usuarios = Array.isArray(db.usuarios) ? db.usuarios : [];
-        db.pacientes = Array.isArray(db.pacientes) ? db.pacientes : [];
-        db.triagens = Array.isArray(db.triagens) ? db.triagens : [];
-        db.consultas = Array.isArray(db.consultas) ? db.consultas : [];
-        db.medicacoes = Array.isArray(db.medicacoes) ? db.medicacoes : [];
-        db.tv_historico = Array.isArray(db.tv_historico)
-            ? db.tv_historico
-            : [];
-        db.altas = Array.isArray(db.altas) ? db.altas : [];
-
-        if (!("tv_chamada" in db)) {
-            db.tv_chamada = null;
-        }
-
-        return db;
-    } catch (erro) {
-        console.error("Erro ao carregar o banco de dados:", erro);
-
-        return {
-            usuarios: [],
-            pacientes: [],
-            triagens: [],
-            consultas: [],
-            medicacoes: [],
-            tv_chamada: null,
-            tv_historico: [],
-            altas: []
-        };
-    }
-}
-
-function salvarDB(db) {
-    try {
-        fs.writeFileSync(
-            DB_PATH,
-            JSON.stringify(db, null, 2),
-            "utf8"
-        );
-
-        return true;
-    } catch (erro) {
-        console.error("Erro ao salvar o banco de dados:", erro);
-        return false;
-    }
-}
-
-let db = carregarDB();
-
-// ============================================================
-// FUNÇÕES AUXILIARES
-// ============================================================
-
-function gerarId() {
-    return Date.now().toString() + Math.floor(Math.random() * 1000);
-}
-
-function dataHoraAtual() {
-    return new Date().toISOString();
-}
-
-function normalizarTexto(texto) {
-    return String(texto || "").trim().toLowerCase();
-}
-
-function buscarPacientePorId(id) {
-    return db.pacientes.find(
-        paciente => String(paciente.id) === String(id)
-    );
-}
-
-function buscarUsuarioPorLogin(login) {
-    return db.usuarios.find(
-        usuario => normalizarTexto(usuario.login) === normalizarTexto(login)
-    );
-}        // ============================================================
-// MEDCORE — SISTEMA HOSPITALAR
-// SERVER.JS
-// ============================================================
-
-const express = require("express");
-const cors = require("cors");
-const fs = require("fs");
-const path = require("path");
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// ============================================================
-// CONFIGURAÇÕES
-// ============================================================
-
-app.use(cors());
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
-
-// Frontend (a pasta front-end fica na raiz do projeto, fora de backend)
-const FRONTEND_DIR = path.join(__dirname, "..", "front-end");
-app.use(express.static(FRONTEND_DIR));
-
-// ============================================================
-// BANCO DE DADOS JSON
-// ============================================================
+const FRONTEND_PATH =
+  FRONTEND_CANDIDATOS.find(p =>
+    fs.existsSync(path.join(p, "index.html"))
+  ) || FRONTEND_CANDIDATOS[0];
 
 const DB_PATH = path.join(__dirname, "db.json");
 
+console.log("MEDCORE iniciando...");
+console.log("Backend:", __dirname);
+console.log("Frontend:", FRONTEND_PATH);
+console.log("Banco de dados:", DB_PATH);
+
+// ============================================================
+// BANCO JSON
+// ============================================================
+
+function bancoInicial() {
+  return {
+    usuarios: [],
+    pacientes: [],
+    triagens: [],
+    consultas: [],
+    altas: [],
+    medicacoes: [],
+    tv_chamada: [],
+    tv_historico: [],
+    altas_historico: []
+  };
+}
+
 function carregarDB() {
-    try {
-        if (!fs.existsSync(DB_PATH)) {
-            const bancoInicial = {
-                usuarios: [],
-                pacientes: [],
-                triagens: [],
-                consultas: [],
-                medicacoes: [],
-                tv_chamada: null,
-                tv_historico: [],
-                altas: []
-            };
-
-            fs.writeFileSync(
-                DB_PATH,
-                JSON.stringify(bancoInicial, null, 2),
-                "utf8"
-            );
-
-            return bancoInicial;
-        }
-
-        const dados = fs.readFileSync(DB_PATH, "utf8");
-
-        if (!dados.trim()) {
-            return {
-                usuarios: [],
-                pacientes: [],
-                triagens: [],
-                consultas: [],
-                medicacoes: [],
-                tv_chamada: null,
-                tv_historico: [],
-                altas: []
-            };
-        }
-
-        const db = JSON.parse(dados);
-
-        // Garante que todas as tabelas existam
-        db.usuarios = Array.isArray(db.usuarios) ? db.usuarios : [];
-        db.pacientes = Array.isArray(db.pacientes) ? db.pacientes : [];
-        db.triagens = Array.isArray(db.triagens) ? db.triagens : [];
-        db.consultas = Array.isArray(db.consultas) ? db.consultas : [];
-        db.medicacoes = Array.isArray(db.medicacoes) ? db.medicacoes : [];
-        db.tv_historico = Array.isArray(db.tv_historico)
-            ? db.tv_historico
-            : [];
-        db.altas = Array.isArray(db.altas) ? db.altas : [];
-
-        if (!("tv_chamada" in db)) {
-            db.tv_chamada = null;
-        }
-
-        return db;
-
-    } catch (erro) {
-        console.error("Erro ao carregar banco:", erro);
-
-        return {
-            usuarios: [],
-            pacientes: [],
-            triagens: [],
-            consultas: [],
-            medicacoes: [],
-            tv_chamada: null,
-            tv_historico: [],
-            altas: []
-        };
+  try {
+    if (!fs.existsSync(DB_PATH)) {
+      fs.writeFileSync(
+        DB_PATH,
+        JSON.stringify(bancoInicial(), null, 2),
+        "utf8"
+      );
     }
+
+    const dados = JSON.parse(fs.readFileSync(DB_PATH, "utf8"));
+    const base = bancoInicial();
+
+    for (const chave of Object.keys(base)) {
+      if (!Array.isArray(dados[chave])) {
+        dados[chave] = base[chave];
+      }
+    }
+
+    return dados;
+  } catch (erro) {
+    console.error("Erro ao carregar db.json:", erro);
+    return bancoInicial();
+  }
 }
 
 let db = carregarDB();
 
 function salvarDB() {
-    try {
-        fs.writeFileSync(
-            DB_PATH,
-            JSON.stringify(db, null, 2),
-            "utf8"
-        );
+  const temporario = DB_PATH + ".tmp";
 
-        return true;
+  fs.writeFileSync(
+    temporario,
+    JSON.stringify(db, null, 2),
+    "utf8"
+  );
 
-    } catch (erro) {
-        console.error("Erro ao salvar banco:", erro);
-        return false;
-    }
+  fs.renameSync(temporario, DB_PATH);
+}
+
+function gerarId(prefixo = "REG") {
+  return `${prefixo}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+}
+
+function normalizar(valor) {
+  return String(valor ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function encontrarPacientePorId(id) {
+  if (id === undefined || id === null || id === "") return null;
+
+  return db.pacientes.find(p =>
+    String(p.id) === String(id) ||
+    String(p.pacienteId) === String(id)
+  ) || null;
+}
+
+function nomePaciente(paciente) {
+  return paciente?.nome ||
+    paciente?.nomeCompleto ||
+    paciente?.paciente ||
+    "";
 }
 
 // ============================================================
-// FUNÇÕES AUXILIARES
+// FRONTEND — CORREÇÃO DO ERRO ENOENT
 // ============================================================
 
-function gerarId(prefixo = "") {
-    return (
-        prefixo +
-        Date.now().toString(36) +
-        Math.random().toString(36).substring(2, 7)
-    ).toUpperCase();
-}
-
-function normalizarTexto(texto) {
-    return String(texto || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim();
-}
-
-function dataAtualISO() {
-    return new Date().toISOString();
-}
-
-function formatarData(data) {
-    if (!data) return "";
-
-    const d = new Date(data);
-
-    if (isNaN(d.getTime())) {
-        return "";
-    }
-
-    return d.toLocaleDateString("pt-BR");
-}
-
-function formatarHora(data) {
-    if (!data) return "";
-
-    const d = new Date(data);
-
-    if (isNaN(d.getTime())) {
-        return "";
-    }
-
-    return d.toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit"
-    });
-}
-
-// ============================================================
-// ROTA INICIAL
-// ============================================================
+app.use(express.static(FRONTEND_PATH));
 
 app.get("/", (req, res) => {
-    const indexPath = path.join(FRONTEND_DIR, "index.html");
+  const indexPath = path.join(FRONTEND_PATH, "index.html");
 
-    if (!fs.existsSync(indexPath)) {
-        console.error("Arquivo não encontrado:", indexPath);
-        return res.status(500).json({
-            sucesso: false,
-            mensagem: "Arquivo index.html não encontrado.",
-            caminhoProcurado: indexPath
-        });
-    }
+  if (!fs.existsSync(indexPath)) {
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "index.html não encontrado.",
+      frontendConfigurado: FRONTEND_PATH,
+      dica: "Confira a estrutura das pastas e o caminho do frontend."
+    });
+  }
 
-    return res.sendFile(indexPath);
+  res.sendFile(indexPath);
+});
+
+// ============================================================
+// STATUS DO SERVIDOR
+// ============================================================
+
+app.get("/status", (req, res) => {
+  res.json({
+    sucesso: true,
+    sistema: "MEDCORE",
+    servidor: "online",
+    frontendEncontrado: fs.existsSync(
+      path.join(FRONTEND_PATH, "index.html")
+    )
+  });
 });
 
 // ============================================================
@@ -341,1397 +162,520 @@ app.get("/", (req, res) => {
 // ============================================================
 
 app.post("/login", (req, res) => {
-    try {
-        const { usuario, senha } = req.body;
+  const usuario = String(req.body.usuario || req.body.email || "").trim();
+  const senha = String(req.body.senha || req.body.password || "");
 
-        if (!usuario || !senha) {
-            return res.status(400).json({
-                sucesso: false,
-                mensagem: "Usuário e senha são obrigatórios."
-            });
-        }
+  const encontrado = db.usuarios.find(u =>
+    String(u.usuario || u.email || u.login || "") === usuario &&
+    String(u.senha || u.password || "") === senha
+  );
 
-        const encontrado = db.usuarios.find((u) => {
-            return (
-                String(u.usuario).toLowerCase() ===
-                    String(usuario).toLowerCase() &&
-                String(u.senha) === String(senha)
-            );
-        });
+  if (!encontrado) {
+    return res.status(401).json({
+      sucesso: false,
+      mensagem: "Usuário ou senha inválidos."
+    });
+  }
 
-        if (!encontrado) {
-            return res.status(401).json({
-                sucesso: false,
-                mensagem: "Usuário ou senha inválidos."
-            });
-        }
-
-        return res.json({
-            sucesso: true,
-            mensagem: "Login realizado com sucesso.",
-            usuario: {
-                id: encontrado.id,
-                nome: encontrado.nome,
-                usuario: encontrado.usuario,
-                tipo: encontrado.tipo
-            }
-        });
-
-    } catch (erro) {
-        console.error("Erro no login:", erro);
-
-        res.status(500).json({
-            sucesso: false,
-            mensagem: "Erro interno no login."
-        });
+  res.json({
+    sucesso: true,
+    mensagem: "Login realizado.",
+    usuario: {
+      id: encontrado.id,
+      nome: encontrado.nome || encontrado.usuario || encontrado.email,
+      perfil: encontrado.perfil || encontrado.tipo || "usuario"
     }
+  });
 });
 
 // ============================================================
-// CADASTRO DE PACIENTE
-// ============================================================
-
-app.post("/atendimento", (req, res) => {
-    try {
-        const {
-            nome,
-            nomeCompleto,
-            cpf,
-            mae,
-            nascimento,
-            estadoCivil,
-            contatoEmergencia,
-            endereco,
-            email,
-            telefone         } = req.body;
-
-        const nomePaciente = nomeCompleto || nome;
-
-        if (!nomePaciente) {
-            return res.status(400).json({
-                sucesso: false,
-                mensagem: "O nome completo do paciente é obrigatório."
-            });
-        }
-
-        const paciente = {
-            id: gerarId("PAC"),
-            nome: nomePaciente,
-            nomeCompleto: nomePaciente,
-            cpf: cpf || "",
-            mae: mae || "",
-            nascimento: nascimento || "",
-            estadoCivil: estadoCivil || "",
-            contatoEmergencia: contatoEmergencia || "",
-            endereco: endereco || "",
-            email: email || "",
-            telefone: telefone || "",
-            status: "aguardando",
-            dataEntrada: dataAtualISO(),
-            createdAt: dataAtualISO()
-        };
-
-        db.pacientes.push(paciente);
-
-        salvarDB();
-
-        res.status(201).json({
-            sucesso: true,
-            mensagem: "Paciente cadastrado com sucesso.",
-            paciente
-        });
-
-    } catch (erro) {
-        console.error("Erro ao cadastrar paciente:", erro);
-
-        res.status(500).json({
-            sucesso: false,
-            mensagem: "Erro ao cadastrar paciente."
-        });
-    }
-});
-
-// ============================================================
-// BUSCAR PACIENTES
+// PACIENTES
 // ============================================================
 
 app.get("/pacientes", (req, res) => {
-    try {
-        const busca = normalizarTexto(req.query.busca || "");
+  const busca = normalizar(req.query.busca || "");
 
-        let pacientes = [...db.pacientes];
+  if (!busca) {
+    return res.json(db.pacientes);
+  }
 
-        if (busca) {
-            pacientes = pacientes.filter((paciente) => {
-                const nome = normalizarTexto(
-                    paciente.nome ||
-                    paciente.nomeCompleto
-                );
+  const encontrados = db.pacientes.filter(p => {
+    const campos = [
+      p.id,
+      p.pacienteId,
+      p.nome,
+      p.nomeCompleto,
+      p.cpf
+    ];
 
-                const cpf = normalizarTexto(paciente.cpf);
-                const id = normalizarTexto(paciente.id);
+    return campos.some(c => normalizar(c).includes(busca));
+  });
 
-                return (
-                    nome.includes(busca) ||
-                    cpf.includes(busca) ||
-                    id.includes(busca)
-                );
-            });
-        }
+  res.json(encontrados);
+});
 
-        res.json({
-            sucesso: true,
-            total: pacientes.length,
-            pacientes
-        });
+app.get("/pacientes/:id", (req, res) => {
+  const paciente = encontrarPacientePorId(req.params.id);
 
-    } catch (erro) {
-        console.error("Erro ao buscar pacientes:", erro);
+  if (!paciente) {
+    return res.status(404).json({
+      sucesso: false,
+      mensagem: "Paciente não encontrado."
+    });
+  }
 
-        res.status(500).json({
-            sucesso: false,
-            mensagem: "Erro ao buscar pacientes."
-        });
-    }
+  res.json(paciente);
 });
 
 // ============================================================
-// BUSCAR PACIENTE POR ID
+// CADASTRO DE PACIENTE / ATENDIMENTO
 // ============================================================
 
-app.get("/pacientes/:id", (req, res) => {
-    try {
-        const paciente = db.pacientes.find(
-            p => String(p.id) === String(req.params.id)
-        );
+app.post("/atendimento", (req, res) => {
+  const corpo = req.body;
+  const nome = corpo.nome || corpo.nomeCompleto || corpo.paciente;
 
-        if (!paciente) {
-            return res.status(404).json({
-                sucesso: false,
-                mensagem: "Paciente não encontrado."
-            });
-        }
+  if (!nome) {
+    return res.status(400).json({
+      sucesso: false,
+      mensagem: "O nome do paciente é obrigatório."
+    });
+  }
 
-        res.json({
-            sucesso: true,
-            paciente
-        });
+  const paciente = {
+    id: corpo.id || gerarId("PAC"),
+    nome: String(nome).trim(),
+    cpf: corpo.cpf || "",
+    nascimento: corpo.nascimento || corpo.dataNascimento || "",
+    telefone: corpo.telefone || "",
+    email: corpo.email || "",
+    endereco: corpo.endereco || "",
+    mae: corpo.mae || corpo.nomeMae || "",
+    estadoCivil: corpo.estadoCivil || "",
+    contatoEmergencia: corpo.contatoEmergencia || "",
+    dataEntrada: corpo.dataEntrada || new Date().toISOString().slice(0, 10),
+    status: "aguardando",
+    createdAt: new Date().toISOString()
+  };
 
-    } catch (erro) {
-        console.error("Erro ao buscar paciente:", erro);
+  db.pacientes.push(paciente);
+  salvarDB();
 
-        res.status(500).json({
-            sucesso: false,
-            mensagem: "Erro ao buscar paciente."
-        });
-    }
-}); // ============================================================
+  res.status(201).json({
+    sucesso: true,
+    mensagem: "Paciente cadastrado.",
+    paciente
+  });
+});
+
+// ============================================================
 // TRIAGEM
 // ============================================================
 
-app.post("/triagem", (req, res) => {
-    try {
-        const {
-            pacienteId,
-            paciente,
-            pressao,
-            temperatura,
-            saturacao,
-            frequenciaCardiaca,
-            sintomas,
-            observacoes,
-            prioridade
-        } = req.body;
-
-        let pacienteEncontrado = null;
-
-        if (pacienteId) {
-            pacienteEncontrado = db.pacientes.find(
-                (p) => String(p.id) === String(pacienteId)
-            );
-        }
-
-        if (!pacienteEncontrado && paciente) {
-            const busca = normalizarTexto(paciente);
-
-            pacienteEncontrado = db.pacientes.find(
-                (p) =>
-                    normalizarTexto(p.nome).includes(busca) ||
-                    normalizarTexto(p.nomeCompleto).includes(busca)
-            );
-        }
-
-        if (!pacienteEncontrado) {
-            return res.status(404).json({
-                sucesso: false,
-                mensagem: "Paciente não encontrado."
-            });
-        }
-
-        let classificacao = prioridade || "Normal";
-        const temp = parseFloat(temperatura);
-
-        if (!isNaN(temp)) {
-            if (temp >= 39) {
-                classificacao = "Urgente";
-            } else if (temp >= 38) {
-                classificacao = "Prioridade";
-            }
-        }
-
-        const novaTriagem = {
-            id: gerarId("TRI"),
-            pacienteId: pacienteEncontrado.id,
-            paciente: pacienteEncontrado.nome,
-            pressao: pressao || "",
-            temperatura: temperatura || "",
-            saturacao: saturacao || "",
-            frequenciaCardiaca: frequenciaCardiaca || "",
-            sintomas: sintomas || "",
-            observacoes: observacoes || "",
-            prioridade: classificacao,
-            status: "aguardando",
-            createdAt: dataHoraAtual()
-        };
-
-        db.triagens.push(novaTriagem);
-
-        pacienteEncontrado.status = "triagem";
-        pacienteEncontrado.ultimaTriagem = novaTriagem.createdAt;
-
-        salvarDB();
-
-        res.status(201).json({
-            sucesso: true,
-            mensagem: "Triagem registrada com sucesso.",
-            triagem: novaTriagem
-        });
-
-    } catch (erro) {
-        console.error("Erro na triagem:", erro);
-
-        res.status(500).json({
-            sucesso: false,
-            mensagem: "Erro ao registrar triagem."
-        });
-    }
-});
-
-// ============================================================
-// LISTAR TRIAGENS
-// ============================================================
-
 app.get("/triagens", (req, res) => {
-    try {
-        const triagens = [...db.triagens].reverse();
+  res.json(db.triagens);
+});
 
-        res.json(triagens);
+app.post("/triagem", (req, res) => {
+  const corpo = req.body;
 
-    } catch (erro) {
-        console.error("Erro ao buscar triagens:", erro);
+  const nome = corpo.nome || corpo.nomeCompleto || corpo.paciente;
 
-        res.status(500).json({
-            sucesso: false,
-            mensagem: "Erro ao buscar triagens."
-        });
-    }
+  if (!nome) {
+    return res.status(400).json({
+      sucesso: false,
+      mensagem: "Informe o nome do paciente."
+    });
+  }
+
+  let paciente = corpo.pacienteId
+    ? encontrarPacientePorId(corpo.pacienteId)
+    : null;
+
+  if (!paciente) {
+    paciente = db.pacientes.find(p =>
+      normalizar(nomePaciente(p)) === normalizar(nome) &&
+      p.status !== "alta"
+    );
+  }
+
+  if (!paciente) {
+    paciente = {
+      id: gerarId("PAC"),
+      nome: String(nome).trim(),
+      cpf: corpo.cpf || "",
+      nascimento: corpo.nascimento || "",
+      dataEntrada: new Date().toISOString().slice(0, 10),
+      status: "aguardando",
+      createdAt: new Date().toISOString()
+    };
+
+    db.pacientes.push(paciente);
+  }
+
+  const triagem = {
+    id: gerarId("TRI"),
+    pacienteId: paciente.id,
+    nome: nomePaciente(paciente),
+    sintoma: corpo.sintoma || corpo.sintomas || "",
+    temperatura: corpo.temperatura || "",
+    risco: corpo.risco || corpo.classificacao || "verde",
+    alergia: corpo.alergia || "Nenhuma",
+    observacao: corpo.observacao || corpo.obs || "",
+    data: new Date().toISOString(),
+    status: "aguardando"
+  };
+
+  paciente.status = "aguardando";
+  db.triagens.push(triagem);
+  salvarDB();
+
+  res.status(201).json({
+    sucesso: true,
+    mensagem: "Triagem registrada.",
+    triagem
+  });
 });
 
 // ============================================================
-// CHAMAR PACIENTE NA TV
-// ============================================================
-
-app.post("/tv/chamar", (req, res) => {
-    try {
-        const {
-            pacienteId,
-            paciente,
-            consultorio,
-            medico
-        } = req.body;
-
-        if (!pacienteId && !paciente) {
-            return res.status(400).json({
-                sucesso: false,
-                mensagem: "Informe o paciente."
-            });
-        }
-
-        let pacienteEncontrado = null;
-
-        if (pacienteId) {
-            pacienteEncontrado = db.pacientes.find(
-                (p) => String(p.id) === String(pacienteId)
-            );
-        }
-
-        if (!pacienteEncontrado && paciente) {
-            const busca = normalizarTexto(paciente);
-
-            pacienteEncontrado = db.pacientes.find(
-                (p) => normalizarTexto(p.nome).includes(busca)
-            );
-        }
-
-        const chamada = {
-            id: gerarId("TV"),
-            pacienteId:
-                pacienteEncontrado?.id ||
-                pacienteId ||
-                "",
-            paciente:
-                pacienteEncontrado?.nome ||
-                paciente ||
-                "",
-            consultorio: consultorio || "01",
-            medico: medico || "",
-            status: "chamando",
-            createdAt: dataHoraAtual()
-        };
-
-        db.tv_chamada = chamada;
-        db.tv_historico.unshift(chamada);
-
-        salvarDB();
-
-        res.json({
-            sucesso: true,
-            mensagem: "Paciente chamado na TV.",
-            chamada
-        });
-
-    } catch (erro) {
-        console.error("Erro ao chamar paciente:", erro);
-
-        res.status(500).json({
-            sucesso: false,
-            mensagem: "Erro ao chamar paciente."
-        });
-    }
-});
-
-// ============================================================
-// CONSULTAR CHAMADA ATUAL DA TV
-// ============================================================
-
-app.get("/tv/chamada", (req, res) => {
-    try {
-        res.json(db.tv_chamada || null);
-
-    } catch (erro) {
-        console.error("Erro ao consultar chamada:", erro);
-
-        res.status(500).json({
-            sucesso: false,
-            mensagem: "Erro ao consultar chamada."
-        });
-    }
-});
-
-// ============================================================
-// FINALIZAR CHAMADA DA TV
-// ============================================================
-
-app.delete("/tv/chamada", (req, res) => {
-    try {
-        db.tv_chamada = null;
-
-        salvarDB();
-
-        res.json({
-            sucesso: true,
-            mensagem: "Chamada finalizada."
-        });
-
-    } catch (erro) {
-        console.error("Erro ao finalizar chamada:", erro);
-
-        res.status(500).json({
-            sucesso: false,
-            mensagem: "Erro ao finalizar chamada."
-        });
-    }
-});
-
-// ============================================================
-// LISTA DE MEDICAÇÕES
+// MEDICAÇÕES
 // ============================================================
 
 app.get("/lista-medicacoes", (req, res) => {
-    try {
-        res.json(db.medicacoes);
+  const nomes = db.medicacoes.map(m =>
+    typeof m === "string" ? m : m.nome
+  ).filter(Boolean);
 
-    } catch (erro) {
-        console.error("Erro ao buscar medicamentos:", erro);
-
-        res.status(500).json({
-            sucesso: false,
-            mensagem: "Erro ao buscar medicamentos."
-        });
-    }
+  res.json(nomes);
 });
-
-// ============================================================
-// CADASTRAR MEDICAÇÃO
-// ============================================================
 
 app.post("/medicacoes", (req, res) => {
-    try {
-        const {
-            nome,
-            principioAtivo,
-            dosagem,
-            quantidade,
-            observacoes
-        } = req.body;
+  const nome = String(req.body.nome || req.body.medicacao || "").trim();
 
-        if (!nome) {
-            return res.status(400).json({
-                sucesso: false,
-                mensagem: "Nome da medicação é obrigatório."
-            });
-        }
+  if (!nome) {
+    return res.status(400).json({
+      sucesso: false,
+      mensagem: "Informe o nome da medicação."
+    });
+  }
 
-        const medicacao = {
-            id: gerarId("MED"),
-            nome,
-            principioAtivo: principioAtivo || "",
-            dosagem: dosagem || "",
-            quantidade: quantidade || "",
-            observacoes: observacoes || "",
-            createdAt: dataHoraAtual()
-        };
+  const existe = db.medicacoes.some(m =>
+    normalizar(typeof m === "string" ? m : m.nome) === normalizar(nome)
+  );
 
-        db.medicacoes.push(medicacao);
+  if (!existe) {
+    db.medicacoes.push(nome);
+    salvarDB();
+  }
 
-        salvarDB();
-
-        res.status(201).json({
-            sucesso: true,
-            mensagem: "Medicação cadastrada.",
-            medicacao
-        });
-
-    } catch (erro) {
-        console.error("Erro ao cadastrar medicação:", erro);
-
-        res.status(500).json({
-            sucesso: false,
-            mensagem: "Erro ao cadastrar medicação."
-        });
-    }
+  res.status(201).json({
+    sucesso: true,
+    mensagem: "Medicação registrada.",
+    medicacao: nome
+  });
 });
 
 // ============================================================
-// CONSULTA MÉDICA
-// ============================================================
-
-app.post("/consulta", (req, res) => {
-    try {
-        const {
-            pacienteId,
-            paciente,
-            medico,
-            consultorio,
-            diagnostico,
-            observacoes,
-            prescricao
-        } = req.body;
-
-        if (!pacienteId && !paciente) {
-            return res.status(400).json({
-                sucesso: false,
-                mensagem: "Informe o paciente."
-            });
-        }
-
-        const consulta = {
-            id: gerarId("CON"),
-            pacienteId: pacienteId || "",
-            paciente: paciente || "",
-            medico: medico || "",
-            consultorio: consultorio || "",
-            diagnostico: diagnostico || "",
-            observacoes: observacoes || "",
-            prescricao: prescricao || "",
-            status: "realizada",
-            createdAt: dataHoraAtual()
-        };
-
-        db.consultas.push(consulta);
-
-        salvarDB();
-
-        res.status(201).json({
-            sucesso: true,
-            mensagem: "Consulta registrada.",
-            consulta
-        });
-
-    } catch (erro) {
-        console.error("Erro ao registrar consulta:", erro);
-
-        res.status(500).json({
-            sucesso: false,
-            mensagem: "Erro ao registrar consulta."
-        });
-    }
-});
-
-// ============================================================
-// LISTAR CONSULTAS
+// CONSULTAS
 // ============================================================
 
 app.get("/consultas", (req, res) => {
-    try {
-        res.json([...db.consultas].reverse());
+  res.json(db.consultas);
+});
 
-    } catch (erro) {
-        console.error("Erro ao buscar consultas:", erro);
+app.post("/consulta", (req, res) => {
+  const corpo = req.body;
+  const pacienteNome = corpo.paciente || corpo.nome;
 
-        res.status(500).json({
-            sucesso: false,
-            mensagem: "Erro ao buscar consultas."
-        });
-    }
-});                 const tamanho =
-            linha.tamanho || 10;
-
-        const fonte =
-            linha.bold
-                ? "Helvetica-Bold"
-                : "Helvetica";
-
-        // Espaçamento
-        if (linha.texto === "") {
-            y -= 10;
-            return;
-        }
-
-        let x = 50;
-
-        // Centralização aproximada
-        if (linha.centralizado) {
-
-            const larguraEstimada =
-                texto.length *
-                tamanho *
-                0.5;
-
-            x =
-                (595 - larguraEstimada) /
-                2;
-        }
-
-        conteudo +=
-            `BT /${fonte} ${tamanho} Tf ${x.toFixed(
-                2
-            )} ${y.toFixed(
-                2
-            )} Td (${texto}) Tj ET\n`;
-
-        if (tamanho >= 16) {
-            y -= 26;
-
-        } else if (tamanho >= 12) {
-            y -= 20;
-
-        } else {
-            y -= 16;
-        }
-
-        // Evita coordenada negativa
-        if (y < 50) {
-            y = 50;
-        }
+  if (!pacienteNome || !corpo.diagnostico) {
+    return res.status(400).json({
+      sucesso: false,
+      mensagem: "Paciente e diagnóstico são obrigatórios."
     });
+  }
 
-    // ========================================================
-    // OBJETOS DO PDF
-    // ========================================================
+  const paciente = corpo.pacienteId
+    ? encontrarPacientePorId(corpo.pacienteId)
+    : db.pacientes.find(p =>
+        normalizar(nomePaciente(p)) === normalizar(pacienteNome)
+      );
 
-    adicionarObjeto(
-        "<< /Type /Catalog /Pages 2 0 R >>"
-    );
+  const consulta = {
+    id: gerarId("CON"),
+    pacienteId: paciente?.id || corpo.pacienteId || null,
+    paciente: paciente ? nomePaciente(paciente) : pacienteNome,
+    diagnostico: corpo.diagnostico,
+    medicacao: corpo.medicacao || corpo.medicamentos || "",
+    obs: corpo.obs || corpo.observacoes || "",
+    medico: corpo.medico || corpo.medicoResponsavel || "",
+    data: new Date().toISOString(),
+    status: "registrada"
+  };
 
-    adicionarObjeto(
-        "<< /Type /Pages /Kids [3 0 R] /Count 1 >>"
-    );
+  db.consultas.push(consulta);
+  salvarDB();
 
-    adicionarObjeto(
-        "<< /Type /Page /Parent 2 0 R " +
-        "/MediaBox [0 0 595 842] " +
-        "/Resources << " +
-        "/Font << " +
-        "/Helvetica 4 0 R " +
-        "/Helvetica-Bold 5 0 R " +
-        ">> " +
-        ">> " +
-        "/Contents 6 0 R >>"
-    );
+  res.status(201).json({
+    sucesso: true,
+    mensagem: "Consulta salva com sucesso.",
+    consulta
+  });
+});
 
-    adicionarObjeto(
-        "<< /Type /Font " +
-        "/Subtype /Type1 " +
-        "/BaseFont /Helvetica " +
-        "/Encoding /WinAnsiEncoding >>"
-    );
+// ============================================================
+// CHAMADA NA TV
+// ============================================================
 
-    adicionarObjeto(
-        "<< /Type /Font " +
-        "/Subtype /Type1 " +
-        "/BaseFont /Helvetica-Bold " +
-        "/Encoding /WinAnsiEncoding >>"
-    );
+app.post("/tv/chamar", (req, res) => {
+  const corpo = req.body;
+  const paciente = corpo.paciente || corpo.nome;
 
-    const stream =
-        `q
-1 1 1 rg
-0 0 595 842 re
-f
-Q
-${conteudo}`;
+  if (!paciente) {
+    return res.status(400).json({
+      sucesso: false,
+      mensagem: "Informe o nome do paciente."
+    });
+  }
 
-    adicionarObjeto(
-        `<< /Length ${Buffer.byteLength(
-            stream,
-            "latin1"
-        )} >>
-stream
-${stream}
-endstream`
-    );
+  const chamada = {
+    id: gerarId("TV"),
+    paciente,
+    localTipo: corpo.localTipo || "CONSULTÓRIO",
+    localNumero: corpo.localNumero || "01",
+    data: new Date().toISOString()
+  };
 
-    // ========================================================
-    // MONTA ARQUIVO PDF
-    // ========================================================
+  db.tv_chamada.push(chamada);
+  db.tv_historico.push(chamada);
 
-    let pdf = "%PDF-1.4\n";
+  // Mantém somente a chamada atual e o histórico.
+  if (db.tv_chamada.length > 1) {
+    db.tv_chamada = [chamada];
+  }
 
-    const offsets = [0];
+  salvarDB();
 
-    for (
-        let i = 0;
-        i < objetos.length;
-        i++
-    ) {
+  res.json({
+    sucesso: true,
+    mensagem: "Paciente chamado na TV.",
+    chamada
+  });
+});
 
-        offsets[i + 1] =
-            Buffer.byteLength(
-                pdf,
-                "latin1"
-            );
+app.get("/tv/chamada", (req, res) => {
+  res.json(db.tv_chamada[db.tv_chamada.length - 1] || null);
+});
 
-        pdf +=
-            `${i + 1} 0 obj\n`;
+app.get("/tv/historico", (req, res) => {
+  res.json(db.tv_historico);
+});
 
-        pdf += objetos[i];
+app.delete("/tv/chamada", (req, res) => {
+  db.tv_chamada = [];
+  salvarDB();
 
-        pdf +=
-            "\nendobj\n";
-    }
-
-    const xref =
-        Buffer.byteLength(
-            pdf,
-            "latin1"
-        );
-
-    pdf +=
-        `xref
-0 ${objetos.length + 1}
-0000000000 65535 f 
-`;
-
-    for (
-        let i = 1;
-        i <= objetos.length;
-        i++
-    ) {
-
-        pdf +=
-            String(
-                offsets[i]
-            ).padStart(
-                10,
-                "0"
-            ) +
-            " 00000 n \n";
-    }
-
-    pdf +=
-        `trailer
-<< /Size ${objetos.length + 1} /Root 1 0 R >>
-startxref
-${xref}
-%%EOF`;
-
-    return Buffer.from(
-        pdf,
-        "latin1"
-    );
-}
+  res.json({
+    sucesso: true,
+    mensagem: "Chamada atual removida."
+  });
+});
 
 // ============================================================
 // ALTA MÉDICA
+// Compatível com alta.html: POST /altas e POST /alta-paciente
 // ============================================================
 
-app.post("/alta-paciente", (req, res) => {
-
-    try {
-
-        // ----------------------------------------------------
-        // DADOS RECEBIDOS DO FRONTEND
-        // ----------------------------------------------------
-
-        const pacienteId =
-            req.body.pacienteId;
-
-        const nomePaciente =
-            req.body.paciente ||
-            req.body.nome;
-
-        const diagnostico =
-            req.body.diagnostico;
-
-        const condicao =
-            req.body.condicao ||
-            req.body.condicaoAlta;
-
-        const resumo =
-            req.body.resumo ||
-            req.body.obs ||
-            req.body.observacoes;
-
-        const medicamentos =
-            req.body.medicamentos ||
-            req.body.medicacao;
-
-        const orientacoes =
-            req.body.orientacoes;
-
-        const retorno =
-            req.body.retorno;
-
-        const medico =
-            req.body.medico ||
-            req.body.medicoResponsavel;
-
-        // ----------------------------------------------------
-        // VALIDAÇÕES
-        // ----------------------------------------------------
-
-        if (
-            !pacienteId &&
-            !nomePaciente
-        ) {
-
-            return res.status(400).json({
-                sucesso: false,
-                mensagem:
-                    "Selecione um paciente antes de conceder a alta."
-            });
-        }
-
-        if (!diagnostico) {
-
-            return res.status(400).json({
-                sucesso: false,
-                mensagem:
-                    "Informe o diagnóstico final."
-            });
-        }
-
-        if (!condicao) {
-
-            return res.status(400).json({
-                sucesso: false,
-                mensagem:
-                    "Informe a condição do paciente na alta."
-            });
-        }
-
-        // ----------------------------------------------------
-        // LOCALIZAR PACIENTE
-        // ----------------------------------------------------
-
-        let paciente = null;
-
-        if (pacienteId) {
-
-            paciente =
-                db.pacientes.find(
-                    (p) =>
-                        String(p.id) ===
-                        String(pacienteId)
-                );
-        }
-
-        if (
-            !paciente &&
-            nomePaciente
-        ) {
-
-            const nomeBusca =
-                normalizarTexto(
-                    nomePaciente
-                );
-
-            paciente =
-                db.pacientes
-                    .slice()
-                    .reverse()
-                    .find(
-                        (p) =>
-                            normalizarTexto(
-                                p.nome ||
-                                p.nomeCompleto
-                            ) === nomeBusca
-                    );
-        }
-
-        if (!paciente) {
-
-            return res.status(404).json({
-                sucesso: false,                  mensagem:
-                    "Paciente não encontrado no sistema."
-            });
-        }
-
-        // ----------------------------------------------------
-        // VERIFICAR SE JÁ POSSUI ALTA
-        // ----------------------------------------------------
-
-        const altaExistente =
-            db.altas.find(
-                (alta) =>
-                    String(
-                        alta.pacienteId
-                    ) ===
-                        String(
-                            paciente.id
-                        ) &&
-                    alta.status === "alta"
-            );
-
-        if (altaExistente) {
-
-            return res.status(409).json({
-                sucesso: false,
-                mensagem:
-                    "Este paciente já possui uma alta registrada."
-            });
-        }
-
-        // ----------------------------------------------------
-        // DATA E HORA
-        // ----------------------------------------------------
-
-        const agora =
-            new Date();
-
-        const data =
-            agora.toLocaleDateString(
-                "pt-BR"
-            );
-
-        const hora =
-            agora.toLocaleTimeString(
-                "pt-BR",
-                {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                }
-            );
-
-        const iso =
-            agora.toISOString();
-
-        // ----------------------------------------------------
-        // REGISTRAR CONSULTA FINAL
-        // ----------------------------------------------------
-
-        const consulta = {
-
-            id: gerarId("CON"),
-
-            pacienteId:
-                paciente.id,
-
-            paciente:
-                paciente.nome ||
-                paciente.nomeCompleto ||
-                "",
-
-            diagnostico:
-                diagnostico,
-
-            medicacao:
-                medicamentos ||
-                "Nenhuma",
-
-            obs:
-                resumo ||
-                "Nenhuma",
-
-            medico:
-                medico ||
-                "",
-
-            createdAt:
-                iso,
-
-            status:
-                "finalizada"
-        };
-
-        db.consultas.push(
-            consulta
-        );
-
-        // ----------------------------------------------------
-        // REGISTRAR ALTA
-        // ----------------------------------------------------
-
-        const alta = {
-
-            id: gerarId("ALT"),
-
-            pacienteId:
-                paciente.id,
-
-            paciente:
-                paciente.nome ||
-                paciente.nomeCompleto ||
-                "",
-
-            cpf:
-                paciente.cpf ||
-                "",
-
-            mae:
-                paciente.mae ||
-                "",
-
-            nascimento:
-                paciente.nascimento ||
-                "",
-
-            estadoCivil:
-                paciente.estadoCivil ||
-                "",
-
-            telefone:
-                paciente.telefone ||
-                "",
-
-            email:
-                paciente.email ||
-                "",
-
-            endereco:
-                paciente.endereco ||
-                "",
-
-            contatoEmergencia:
-                paciente.contatoEmergencia ||
-                paciente.emergencia ||
-                "",
-
-            diagnostico:
-                diagnostico,
-
-            condicao:
-                condicao,
-
-            resumo:
-                resumo ||
-                "",
-
-            medicacao:
-                medicamentos ||
-                "",
-
-            medicamentos:
-                medicamentos ||
-                "",
-
-            orientacoes:
-                orientacoes ||
-                "",
-
-            retorno:
-                retorno ||
-                "",
-
-            medico:
-                medico ||
-                "",
-
-            medicoResponsavel:
-                medico ||
-                "",
-
-            observacoes:
-                resumo ||
-                "",
-
-            consultaId:
-                consulta.id,
-
-            data:
-                data,
-
-            hora:
-                hora,
-
-            createdAt:
-                iso,
-
-            status:
-                "alta"
-        };
-
-        db.altas.push(
-            alta
-        );
-
-        // ----------------------------------------------------
-        // ATUALIZAR STATUS DO PACIENTE
-        // ----------------------------------------------------
-
-        const pacienteIndex =
-            db.pacientes.findIndex(
-                (p) =>
-                    String(p.id) ===
-                    String(paciente.id)
-            );
-
-        if (
-            pacienteIndex !== -1
-        ) {
-
-            db.pacientes[
-                pacienteIndex
-            ].status = "alta";
-
-            db.pacientes[
-                pacienteIndex
-            ].altaEm = iso;
-        }
-
-        // ----------------------------------------------------
-        // REMOVER PACIENTE DA TRIAGEM
-        // ----------------------------------------------------
-
-        db.triagens =
-            db.triagens.filter(
-                (triagem) => {
-
-                    const mesmoPaciente =
-                        String(
-                            triagem.pacienteId ||
-                            ""
-                        ) ===
-                        String(
-                            paciente.id
-                        );
-
-                    const mesmoNome =
-                        normalizarTexto(
-                            triagem.paciente
-                        ) ===
-                        normalizarTexto(
-                            paciente.nome ||
-                            paciente.nomeCompleto ||
-                            ""
-                        );
-
-                    return !(
-                        mesmoPaciente ||
-                        mesmoNome
-                    );
-                } 
-            );                            normalizarTexto(
-                            triagem.paciente
-                        ) ===
-                        normalizarTexto(
-                            paciente.nome ||
-                            paciente.nomeCompleto
-                        );
-
-                    return !(
-                        (mesmoPaciente ||
-                            mesmoNome) &&
-                        (
-                            triagem.status ===
-                                "aguardando" ||
-                            triagem.status ===
-                                "aguardando_medico"
-                        )
-                    );
-                }
-            );
-
-// ----------------------------------------------------
-// SALVAR
-// ----------------------------------------------------
-
-        const salvo =
-            salvarDB();
-
-        if (!salvo) {
-
-            return res.status(500).json({
-                sucesso: false,
-                mensagem:
-                    "A alta foi processada, mas não foi possível salvar o banco de dados."
-            });
-        }
-
-// ----------------------------------------------------
-// RESPOSTA
-// ----------------------------------------------------
-
-        return res.status(201).json({
-
-            sucesso: true,
-
-            mensagem:
-                "Alta médica registrada com sucesso.",
-
-            alta: alta
-        });
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao realizar alta:",
-            erro
-        );
-
-        return res.status(500).json({
-
-            sucesso: false,
-
-            mensagem:
-                "Erro interno ao realizar a alta do paciente.",
-
-            erro:
-                erro.message
-        });
-    }
-});
-
-// ============================================================
-// LISTAR ALTAS
-// ============================================================
+function registrarAlta(req, res) {
+  const corpo = req.body;
+
+  const idInformado = corpo.pacienteId || corpo.idPaciente;
+  const nomeInformado = String(
+    corpo.paciente || corpo.nome || corpo.nomePaciente || ""
+  ).trim();
+
+  if (!nomeInformado) {
+    return res.status(400).json({
+      sucesso: false,
+      mensagem: "Selecione um paciente."
+    });
+  }
+
+  if (!corpo.diagnostico || !String(corpo.diagnostico).trim()) {
+    return res.status(400).json({
+      sucesso: false,
+      mensagem: "Informe o diagnóstico final."
+    });
+  }
+
+  if (!corpo.condicao && !corpo.condicaoAlta) {
+    return res.status(400).json({
+      sucesso: false,
+      mensagem: "Informe a condição do paciente na alta."
+    });
+  }
+
+  let paciente = idInformado
+    ? encontrarPacientePorId(idInformado)
+    : null;
+
+  if (!paciente) {
+    paciente = db.pacientes.find(p =>
+      normalizar(nomePaciente(p)) === normalizar(nomeInformado)
+    );
+  }
+
+  // Se o cadastro não estiver na lista, cria um registro básico
+  // para não perder a alta enviada pela página.
+  if (!paciente) {
+    paciente = {
+      id: idInformado || gerarId("PAC"),
+      nome: nomeInformado,
+      cpf: corpo.cpf || "",
+      nascimento: corpo.nascimento || "",
+      dataEntrada: corpo.dataEntrada || "",
+      status: "alta"
+    };
+
+    db.pacientes.push(paciente);
+  }
+
+  const agora = new Date();
+  const dataISO = agora.toISOString();
+
+  const alta = {
+    id: gerarId("ALT"),
+    pacienteId: paciente.id,
+    paciente: nomePaciente(paciente) || nomeInformado,
+    cpf: corpo.cpf || paciente.cpf || "",
+    nascimento: corpo.nascimento || paciente.nascimento || "",
+    dataEntrada: corpo.dataEntrada || paciente.dataEntrada || "",
+    diagnostico: String(corpo.diagnostico).trim(),
+    condicao: corpo.condicao || corpo.condicaoAlta,
+    resumo: corpo.resumo || "",
+    medicamentos: corpo.medicamentos || corpo.medicacao || "",
+    medicacao: corpo.medicamentos || corpo.medicacao || "",
+    orientacoes: corpo.orientacoes || "",
+    retorno: corpo.retorno || "",
+    medico: corpo.medico || corpo.medicoResponsavel || "",
+    medicoResponsavel: corpo.medicoResponsavel || corpo.medico || "",
+    data: dataISO,
+    dataAlta: dataISO,
+    hora: agora.toLocaleTimeString("pt-BR"),
+    createdAt: dataISO,
+    status: "alta"
+  };
+
+  db.altas.push(alta);
+  db.altas_historico.push(alta);
+
+  paciente.status = "alta";
+  paciente.altaEm = dataISO;
+
+  // Retira da fila de triagem o paciente que recebeu alta.
+  db.triagens = db.triagens.filter(t =>
+    String(t.pacienteId || "") !== String(paciente.id) &&
+    normalizar(t.nome) !== normalizar(nomePaciente(paciente))
+  );
+
+  salvarDB();
+
+  return res.status(201).json({
+    sucesso: true,
+    mensagem: "Alta registrada com sucesso.",
+    alta
+  });
+}
+
+app.post("/altas", registrarAlta);
+app.post("/alta-paciente", registrarAlta);
 
 app.get("/altas", (req, res) => {
-
-    try {
-
-        const altas =
-            [...db.altas]
-                .reverse();
-
-        res.json(
-            altas
-        );
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao buscar altas:",
-            erro
-        );
-
-        res.status(500).json({
-            sucesso: false,
-            mensagem:
-                "Erro ao buscar histórico de altas."
-        });
-    }
+  res.json(db.altas);
 });
-
-// ============================================================
-// BUSCAR ALTA POR ID
-// ============================================================
 
 app.get("/alta/:id", (req, res) => {
+  const alta = db.altas.find(a =>
+    String(a.id) === String(req.params.id)
+  );
 
-    try {
+  if (!alta) {
+    return res.status(404).json({
+      sucesso: false,
+      mensagem: "Registro de alta não encontrado."
+    });
+  }
 
-        const alta =
-            db.altas.find(
-                (a) =>
-                    String(a.id) ===
-                    String(req.params.id)
-            );
-
-        if (!alta) {
-
-            return res.status(404).json({
-                sucesso: false,
-                mensagem:
-                    "Alta não encontrada."
-            });
-        }
-
-        res.json(
-            alta
-        );
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao buscar alta:",
-            erro
-        );
-
-        res.status(500).json({
-            sucesso: false,
-            mensagem:
-                "Erro ao buscar alta."
-        });
-    }
+  res.json(alta);
 });
 
 // ============================================================
-// GERAR PDF DA ALTA PELO ID
+// PDF DA ALTA — opcional, usando pdfkit se estiver instalado
 // ============================================================
 
 app.get("/alta/:id/pdf", (req, res) => {
+  const alta = db.altas.find(a =>
+    String(a.id) === String(req.params.id)
+  );
 
-    try {
+  if (!alta) {
+    return res.status(404).json({
+      sucesso: false,
+      mensagem: "Registro de alta não encontrado."
+    });
+  }
 
-        const alta =
-            db.altas.find(
-                (a) =>
-                    String(a.id) ===
-                    String(req.params.id)
-            );
+  let PDFDocument;
 
-        if (!alta) {
+  try {
+    PDFDocument = require("pdfkit");
+  } catch {
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "A biblioteca pdfkit não está instalada."
+    });
+  }
 
-            return res.status(404).json({
-                sucesso: false,
-                mensagem:
-                    "Alta não encontrada."
-            });
-        }
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `inline; filename="alta-${alta.id}.pdf"`
+  );
 
-        const pdf =
-            gerarPDFAlta(
-                alta
-            );
+  const doc = new PDFDocument({ margin: 50 });
+  doc.pipe(res);
 
-        res.setHeader(
-            "Content-Type",
-            "application/pdf"
-        );
+  doc.fontSize(20).text("MEDCORE", { align: "center" });
+  doc.moveDown();
+  doc.fontSize(16).text("TERMO DE ALTA MÉDICA", { align: "center" });
+  doc.moveDown(2);
 
-        res.setHeader(
-            "Content-Disposition",
-            `inline; filename="alta-${alta.pacienteId}.pdf"`
-        );
+  const campos = [
+    ["Paciente", alta.paciente],
+    ["CPF", alta.cpf],
+    ["Data de entrada", alta.dataEntrada],
+    ["Data da alta", alta.dataAlta || alta.data],
+    ["Diagnóstico", alta.diagnostico],
+    ["Condição na alta", alta.condicao],
+    ["Resumo do atendimento", alta.resumo],
+    ["Medicamentos / prescrições", alta.medicamentos],
+    ["Orientações", alta.orientacoes],
+    ["Retorno / acompanhamento", alta.retorno],
+    ["Médico responsável", alta.medicoResponsavel || alta.medico]
+  ];
 
-        res.setHeader(
-            "Content-Length",
-            pdf.length
-        );
+  for (const [titulo, valor] of campos) {
+    doc.fontSize(11).font("Helvetica-Bold").text(`${titulo}:`);
+    doc.font("Helvetica").text(String(valor || "Não informado"));
+    doc.moveDown(0.6);
+  }
 
-        res.end(
-            pdf
-        );
+  doc.moveDown();
+  doc.fontSize(10).text(
+    "Documento gerado pelo sistema MEDCORE.",
+    { align: "center" }
+  );
 
-    } catch (erro) {
-
-        console.error(
-            "Erro ao gerar PDF:",
-            erro
-        );
-
-        res.status(500).json({
-            sucesso: false,
-            mensagem:
-                "Erro ao gerar PDF da alta."
-        });
-    }
-});
-
-// ============================================================
-// EXCLUIR ALTA
-// ============================================================
-
-app.delete("/alta/:id", (req, res) => {
-
-    try {
-
-        const index =
-            db.altas.findIndex(
-                (a) =>
-                    String(a.id) ===
-                    String(req.params.id)
-            );
-
-        if (index === -1) {
-
-            return res.status(404).json({
-                sucesso: false,
-                mensagem:
-                    "Alta não encontrada."
-            });
-        }
-
-        const alta =
-            db.altas[index];
-
-        db.altas.splice(
-            index,
-            1
-        );
-
-        // Caso a alta seja excluída,
-        // o paciente volta para o status aguardando
-        const paciente =
-            db.pacientes.find(
-                (p) =>
-                    String(p.id) ===
-                    String(
-                        alta.pacienteId
-                    )
-            );
-
-        if (paciente) {
-
-            paciente.status =
-                "aguardando";
-
-            delete paciente.altaEm;
-        }
-
-        salvarDB();
-
-        res.json({
-            sucesso: true,
-            mensagem:
-                "Alta excluída com sucesso."
-        });
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao excluir alta:",
-            erro
-        );
-
-        res.status(500).json({
-            sucesso: false,
-            mensagem:
-                "Erro ao excluir alta."
-        });
-    }
+  doc.end();
 });
 
 // ============================================================
@@ -1739,162 +683,46 @@ app.delete("/alta/:id", (req, res) => {
 // ============================================================
 
 app.get("/historico", (req, res) => {
-
-    try {
-
-        const historico = {
-
-            pacientes:
-                [...db.pacientes]
-                    .reverse(),
-
-            triagens:
-                [...db.triagens]
-                    .reverse(),
-
-            consultas:
-                [...db.consultas]
-                    .reverse(),
-
-            altas:
-                [...db.altas]
-                    .reverse(),
-
-            tv:
-                [...db.tv_historico]
-                    .reverse()
-        };
-
-        res.json(
-            historico
-        );
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao buscar histórico:",
-            erro
-        );
-
-        res.status(500).json({
-            sucesso: false,
-            mensagem:
-                "Erro ao buscar histórico."
-        });
-    }
+  res.json({
+    consultas: db.consultas,
+    altas: db.altas,
+    triagens: db.triagens,
+    chamadasTV: db.tv_historico
+  });
 });
 
 // ============================================================
-// STATUS DO SISTEMA
-// ============================================================
-
-app.get("/status", (req, res) => {
-
-    res.json({
-
-        sistema:
-            "MEDCORE",
-
-        status:
-            "online",
-
-        porta:
-            PORT,
-
-        data:
-            dataAtualISO(),
-
-        banco: {
-
-            pacientes:
-                db.pacientes.length,
-
-            triagens:
-                db.triagens.length,
-
-            consultas:
-                db.consultas.length,
-
-            altas:
-                db.altas.length
-        }
-    });
-});
-
-// ============================================================
-// TRATAMENTO DE ROTAS NÃO ENCONTRADAS
+// 404 E ERROS
 // ============================================================
 
 app.use((req, res) => {
+  res.status(404).json({
+    sucesso: false,
+    mensagem: "Rota não encontrada.",
+    rota: req.originalUrl
+  });
+});
 
-    res.status(404).json({
+app.use((erro, req, res, next) => {
+  console.error("Erro interno:", erro);
 
-        sucesso: false,
+  if (res.headersSent) {
+    return next(erro);
+  }
 
-        mensagem:
-            "Rota não encontrada.",
-
-        rota:
-            req.originalUrl
-    });
+  res.status(500).json({
+    sucesso: false,
+    mensagem: "Erro interno do servidor.",
+    erro: process.env.NODE_ENV === "production"
+      ? undefined
+      : erro.message
+  });
 });
 
 // ============================================================
-// TRATAMENTO DE ERROS
+// INICIALIZAÇÃO
 // ============================================================
 
-app.use(
-    (erro, req, res, next) => {
-
-        console.error(
-            "Erro interno do servidor:",
-            erro
-        );
-
-        res.status(500).json({
-
-            sucesso: false,
-
-            mensagem:
-                "Erro interno do servidor.",
-
-            erro:
-                erro.message
-        });
-    }
-);
-
-// ============================================================
-// INICIAR SERVIDOR
-// ============================================================
-
-app.listen(
-    PORT,
-    "0.0.0.0",
-    () => {
-
-        console.log(
-            "================================================"
-        );
-
-        console.log(
-            "        MEDCORE — SISTEMA HOSPITALAR"
-        );
-
-        console.log(
-            "================================================"
-        );
-
-        console.log(
-            `Servidor rodando na porta ${PORT}`
-        );
-
-        console.log(
-            `http://localhost:${PORT}`
-        );
-
-        console.log(
-            "================================================"
-        );
-    }
-);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`MEDCORE rodando na porta ${PORT}`);
+});
