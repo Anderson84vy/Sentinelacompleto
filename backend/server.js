@@ -7,14 +7,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // =====================================================
-// CONFIGURAÇÕES
+// CONFIGURAÇÕES DO MEDCORE
 // =====================================================
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-// Frontend do MEDCORE
 app.use(express.static(path.join(__dirname, "../frontend")));
 
 // =====================================================
@@ -35,7 +34,12 @@ function readDB() {
       tv_historico: []
     };
 
-    fs.writeFileSync(DB_FILE, JSON.stringify(inicial, null, 2), "utf8");
+    fs.writeFileSync(
+      DB_FILE,
+      JSON.stringify(inicial, null, 2),
+      "utf8"
+    );
+
     return inicial;
   }
 
@@ -53,18 +57,29 @@ function readDB() {
   if (!Array.isArray(db.triagens)) db.triagens = [];
   if (!Array.isArray(db.consultas)) db.consultas = [];
   if (!Array.isArray(db.altas)) db.altas = [];
-  if (typeof db.tv_chamada === "undefined") db.tv_chamada = null;
-  if (!Array.isArray(db.tv_historico)) db.tv_historico = [];
+
+  if (typeof db.tv_chamada === "undefined") {
+    db.tv_chamada = null;
+  }
+
+  if (!Array.isArray(db.tv_historico)) {
+    db.tv_historico = [];
+  }
 
   return db;
 }
 
 function writeDB(db) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf8");
+  fs.writeFileSync(
+    DB_FILE,
+    JSON.stringify(db, null, 2),
+    "utf8"
+  );
 }
 
 function gerarId(prefixo = "") {
-  return prefixo + Date.now() + Math.floor(Math.random() * 1000);
+  return prefixo + Date.now() +
+    Math.floor(Math.random() * 1000);
 }
 
 function normalizarTexto(texto) {
@@ -76,17 +91,21 @@ function normalizarTexto(texto) {
 }
 
 function numeroOuNulo(valor) {
-  if (valor === "" || valor === null || valor === undefined) return null;
+  if (valor === "" || valor === null || valor === undefined) {
+    return null;
+  }
+
   const numero = Number(valor);
+
   return Number.isFinite(numero) ? numero : null;
 }
 
 // =====================================================
-// MEDCORE — MOTOR DE APOIO À TRIAGEM
-// Regras demonstrativas: não substituem avaliação clínica.
+// MEDCORE — ANÁLISE AUTOMATIZADA DA TRIAGEM
+// Regras demonstrativas. Não substituem avaliação clínica.
 // =====================================================
 
-function analisarRisco(dados) {
+function analisarRisco(dados = {}) {
   const sintoma = normalizarTexto(dados.sintoma);
   const temperatura = numeroOuNulo(dados.temperatura);
   const saturacao = numeroOuNulo(dados.saturacao);
@@ -104,7 +123,8 @@ function analisarRisco(dados) {
   if (sinaisEmergencia[sintoma]) {
     return {
       risco: "vermelho",
-      motivo: sinaisEmergencia[sintoma] +
+      motivo:
+        sinaisEmergencia[sintoma] +
         ". Alerta para avaliação clínica imediata."
     };
   }
@@ -112,21 +132,31 @@ function analisarRisco(dados) {
   const motivosEmergencia = [];
 
   if (saturacao !== null && saturacao <= 90) {
-    motivosEmergencia.push("Saturação de oxigênio muito baixa");
+    motivosEmergencia.push(
+      "Saturação de oxigênio muito baixa"
+    );
   }
 
-  if (respiracao !== null && (respiracao < 8 || respiracao > 30)) {
-    motivosEmergencia.push("Frequência respiratória em faixa de alerta");
+  if (
+    respiracao !== null &&
+    (respiracao < 8 || respiracao > 30)
+  ) {
+    motivosEmergencia.push(
+      "Frequência respiratória em faixa de alerta"
+    );
   }
 
   if (pulso !== null && (pulso < 40 || pulso > 130)) {
-    motivosEmergencia.push("Pulso em faixa de alerta");
+    motivosEmergencia.push(
+      "Pulso em faixa de alerta"
+    );
   }
 
-  if (motivosEmergencia.length) {
+  if (motivosEmergencia.length > 0) {
     return {
       risco: "vermelho",
-      motivo: motivosEmergencia.join("; ") +
+      motivo:
+        motivosEmergencia.join("; ") +
         ". Necessária avaliação clínica imediata."
     };
   }
@@ -138,33 +168,43 @@ function analisarRisco(dados) {
   }
 
   if (saturacao !== null && saturacao <= 93) {
-    motivosPrioritarios.push("Saturação de oxigênio reduzida");
+    motivosPrioritarios.push(
+      "Saturação de oxigênio reduzida"
+    );
   }
 
-  if (temperatura !== null && temperatura >= 39) {
-    motivosPrioritarios.push("Temperatura elevada");
-  } else if (temperatura !== null && temperatura >= 38) {
-    motivosPrioritarios.push("Febre registrada");
+  if (temperatura !== null && temperatura >= 38) {
+    motivosPrioritarios.push(
+      temperatura >= 39
+        ? "Temperatura muito elevada"
+        : "Febre registrada"
+    );
   }
 
-  if (motivosPrioritarios.length) {
+  if (motivosPrioritarios.length > 0) {
     return {
       risco: "amarelo",
-      motivo: motivosPrioritarios.join("; ") +
+      motivo:
+        motivosPrioritarios.join("; ") +
         ". Confirmar prioridade conforme protocolo clínico."
     };
   }
 
-  if (["vomito", "diarreia", "febre"].includes(sintoma)) {
+  if (
+    ["vomito", "diarreia", "febre"].includes(sintoma)
+  ) {
     return {
       risco: "amarelo",
-      motivo: "Sintoma que requer avaliação clínica e verificação de sinais de alerta."
+      motivo:
+        "Sintoma que requer avaliação clínica e verificação de sinais de alerta."
     };
   }
 
   return {
     risco: "verde",
-    motivo: "Nenhum dos alertas programados foi identificado nos dados informados. A equipe deve avaliar o paciente e confirmar a prioridade."
+    motivo:
+      "Nenhum dos alertas programados foi identificado. " +
+      "A equipe deve avaliar o paciente e confirmar a prioridade."
   };
 }
 
@@ -190,13 +230,16 @@ app.post("/login", (req, res) => {
 
     res.json(encontrado);
   } catch (erro) {
-    console.error(erro);
-    res.status(500).json({ mensagem: "Erro ao realizar login." });
+    console.error("Erro no login:", erro);
+
+    res.status(500).json({
+      mensagem: "Erro ao realizar login."
+    });
   }
 });
 
 // =====================================================
-// CADASTRO DE PACIENTES
+// CADASTRAR PACIENTE
 // =====================================================
 
 app.post("/atendimento", (req, res) => {
@@ -205,7 +248,7 @@ app.post("/atendimento", (req, res) => {
 
     const paciente = {
       id: Date.now(),
-      nome: req.body.nome || req.body.nomeCompleto,
+      nome: req.body.nome || req.body.nomeCompleto || "",
       cpf: req.body.cpf || "",
       mae: req.body.mae || "",
       nascimento: req.body.nascimento || "",
@@ -219,7 +262,7 @@ app.post("/atendimento", (req, res) => {
       createdAt: new Date().toISOString()
     };
 
-    if (!paciente.nome) {
+    if (!String(paciente.nome).trim()) {
       return res.status(400).json({
         sucesso: false,
         mensagem: "Informe o nome do paciente."
@@ -235,7 +278,8 @@ app.post("/atendimento", (req, res) => {
       paciente
     });
   } catch (erro) {
-    console.error(erro);
+    console.error("Erro ao cadastrar paciente:", erro);
+
     res.status(500).json({
       sucesso: false,
       mensagem: "Erro ao cadastrar paciente."
@@ -257,13 +301,15 @@ app.get("/pacientes", (req, res) => {
     if (busca) {
       pacientes = pacientes.filter(p =>
         normalizarTexto(p.nome).includes(busca) ||
-        String(p.cpf || "").includes(busca)
+        normalizarTexto(p.cpf).includes(busca) ||
+        String(p.id).includes(busca)
       );
     }
 
     res.json(pacientes);
   } catch (erro) {
-    console.error(erro);
+    console.error("Erro ao listar pacientes:", erro);
+
     res.status(500).json({
       mensagem: "Erro ao listar pacientes."
     });
@@ -276,408 +322,11 @@ app.get("/pacientes", (req, res) => {
 
 app.post("/triagem/analisar", (req, res) => {
   try {
-    const resultado = analisarRisco(req.body || {});
-
-    res.json({
-      sucesso: true,
-      risco: resultado.risco,
-      motivo: resultado.motivo
-    });
-  } catch (erro) {
-    console.error("Erro ao analisar triagem:", erro);
-    res.status(500).json({
-      sucesso: false,
-      mensagem: "Não foi possível analisar os dados da triagem."
-    });
-  }
-});
-
-// =====================================================
-// SALVAR TRIAGEM
-// =====================================================
-
-app.post("/triagem", (req, res) => {
-  try {
-    const db = readDB();
-
-    const nome = String(req.body.nome || "").trim();
-
-    if (!nome) {
-      return res.status(400).json({
-        sucesso: false,
-        mensagem: "Informe o nome do paciente."
-      });
-    }
-
-    // O servidor calcula o risco; não confia apenas no risco enviado
-    // pelo navegador.
-    const resultadoRisco = analisarRisco(req.body);
-
-    const triagem = {
-      id: gerarId("TRI"),
-      pacienteId: req.body.pacienteId || null,
-      nome,
-      sintoma: req.body.sintoma || "",
-      temperatura: numeroOuNulo(req.body.temperatura),
-      pulso: numeroOuNulo(req.body.pulso),
-      saturacao: numeroOuNulo(req.body.saturacao),
-      respiracao: numeroOuNulo(req.body.respiracao),
-      pressao: req.body.pressao || "",
-      alergia: req.body.alergia || "",
-      observacao: req.body.observacao || "",
-      risco: resultadoRisco.risco,
-      motivoRisco: resultadoRisco.motivo,
-      status: "aguardando_medico",
-      createdAt: new Date().toISOString()
-    };
-
-    db.triagens.push(triagem);
-
-    let paciente = null;
-
-    if (triagem.pacienteId !== null) {
-      paciente = db.pacientes.find(p =>
-        String(p.id) === String(triagem.pacienteId)
-      );
-    }
-
-    if (!paciente) {
-      paciente = db.pacientes.find(p =>
-        normalizarTexto(p.nome) === normalizarTexto(nome) &&
-        p.status === "triagem"
-      );
-    }
-
-    if (paciente) {
-      paciente.status = "aguardando_medico";
-      paciente.risco = triagem.risco;
-      paciente.triagemId = triagem.id;
-    }
-
-    writeDB(db);
-
-    res.status(201).json({
-      sucesso: true,
-      mensagem: "Triagem salva com sucesso.",
-      triagem
-    });
-  } catch (erro) {
-    console.error("Erro ao salvar triagem:", erro);
-    res.status(500).json({
-      sucesso: false,
-      mensagem: "Erro ao salvar a triagem."
-    });
-  }
-});
-
-// =====================================================
-// LISTAR TRIAGENS — PRIORIDADE VISUAL
-// =====================================================
-
-app.get("/triagens", (req, res) => {
-  try {
-    const db = readDB();
-
-    const prioridade = {
-      vermelho: 1,
-      laranja: 2,
-      amarelo: 3,
-      verde: 4,
-      azul: 5
-    };
-
-    const triagens = [...db.triagens].sort((a, b) => {
-      const prioridadeA = prioridade[a.risco] || 99;
-      const prioridadeB = prioridade[b.risco] || 99;
-
-      if (prioridadeA !== prioridadeB) {
-        return prioridadeA - prioridadeB;
-      }
-
-      return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-    });
-
-    res.json(triagens);
-  } catch (erro) {
-    console.error(erro);
-    res.status(500).json({
-      mensagem: "Erro ao listar triagens."
-    });
-  }
-});  
-
-// =====================================================
-// BANCO DE DADOS
-// =====================================================
-
-const DB_FILE = path.join(__dirname, "db.json");
-
-function readDB() {
-  if (!fs.existsSync(DB_FILE)) {
-    const inicial = {
-      usuarios: [],
-      pacientes: [],
-      triagens: [],
-      consultas: [],
-      altas: [],
-      tv_chamada: null,
-      tv_historico: []
-    };
-
-    fs.writeFileSync(DB_FILE, JSON.stringify(inicial, null, 2), "utf8");
-    return inicial;
-  }
-
-  let db;
-
-  try {
-    db = JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
-  } catch (erro) {
-    console.error("Erro ao ler db.json:", erro);
-    throw new Error("O arquivo db.json está inválido.");
-  }
-
-  if (!Array.isArray(db.usuarios)) db.usuarios = [];
-  if (!Array.isArray(db.pacientes)) db.pacientes = [];
-  if (!Array.isArray(db.triagens)) db.triagens = [];
-  if (!Array.isArray(db.consultas)) db.consultas = [];
-  if (!Array.isArray(db.altas)) db.altas = [];
-  if (typeof db.tv_chamada === "undefined") db.tv_chamada = null;
-  if (!Array.isArray(db.tv_historico)) db.tv_historico = [];
-
-  return db;
-}
-
-function writeDB(db) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf8");
-}
-
-function gerarId(prefixo = "") {
-  return prefixo + Date.now() + Math.floor(Math.random() * 1000);
-}
-
-function normalizarTexto(texto) {
-  return String(texto || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
-function numeroOuNulo(valor) {
-  if (valor === "" || valor === null || valor === undefined) {
-    return null;
-  }
-
-  const numero = Number(valor);
-  return Number.isFinite(numero) ? numero : null;
-}
-
-// =====================================================
-// MEDCORE — MOTOR DE APOIO À TRIAGEM
-// Regras demonstrativas; não substituem avaliação clínica.
-// =====================================================
-
-function analisarRisco(dados) {
-  const sintoma = normalizarTexto(dados.sintoma);
-  const temperatura = numeroOuNulo(dados.temperatura);
-  const saturacao = numeroOuNulo(dados.saturacao);
-  const pulso = numeroOuNulo(dados.pulso);
-  const respiracao = numeroOuNulo(dados.respiracao);
-
-  const sinaisEmergencia = {
-    infarto: "Suspeita de infarto",
-    avc: "Suspeita de AVC",
-    convulsao: "Convulsão",
-    hemorragia: "Hemorragia",
-    falta_ar_grave: "Falta de ar grave"
-  };
-
-  if (sinaisEmergencia[sintoma]) {
-    return {
-      risco: "vermelho",
-      motivo: sinaisEmergencia[sintoma] +
-        ". Alerta para avaliação clínica imediata."
-    };
-  }
-
-  const motivosEmergencia = [];
-
-  // Limiares demonstrativos para adultos.
-  // Não utilizar como protocolo clínico sem validação profissional.
-
-  if (saturacao !== null && saturacao <= 90) {
-    motivosEmergencia.push("Saturação de oxigênio muito baixa");
-  }
-
-  if (respiracao !== null && (respiracao < 8 || respiracao > 30)) {
-    motivosEmergencia.push("Frequência respiratória em faixa de alerta");
-  }
-
-  if (pulso !== null && (pulso < 40 || pulso > 130)) {
-    motivosEmergencia.push("Pulso em faixa de alerta");
-  }
-
-  if (motivosEmergencia.length > 0) {
-    return {
-      risco: "vermelho",
-      motivo: motivosEmergencia.join("; ") +
-        ". Necessária avaliação clínica imediata."
-    };
-  }
-
-  const motivosPrioritarios = [];
-
-  if (sintoma === "falta_ar_moderada") {
-    motivosPrioritarios.push("Relato de falta de ar");
-  }
-
-  if (saturacao !== null && saturacao <= 93) {
-    motivosPrioritarios.push("Saturação de oxigênio reduzida");
-  }
-
-  if (temperatura !== null && temperatura >= 39) {
-    motivosPrioritarios.push("Temperatura elevada");
-  } else if (temperatura !== null && temperatura >= 38) {
-    motivosPrioritarios.push("Febre registrada");
-  }
-
-  if (motivosPrioritarios.length > 0) {
-    return {
-      risco: "amarelo",
-      motivo: motivosPrioritarios.join("; ") +
-        ". Confirmar prioridade conforme protocolo clínico."
-    };
-  }
-
-  if (["vomito", "diarreia", "febre"].includes(sintoma)) {
-    return {
-      risco: "amarelo",
-      motivo: "Sintoma que requer avaliação clínica e verificação de sinais de alerta."
-    };
-  }
-
-  return {
-    risco: "verde",
-    motivo: "Nenhum dos alertas programados foi identificado nos dados informados. A equipe deve avaliar o paciente e confirmar a prioridade."
-  };
-}
-
-// =====================================================
-// LOGIN
-// =====================================================
-
-app.post("/login", (req, res) => {
-  try {
-    const db = readDB();
-    const { usuario, senha } = req.body;
-
-    const encontrado = db.usuarios.find(u =>
-      u.usuario === usuario && u.senha === senha
-    );
-
-    if (!encontrado) {
-      return res.status(401).json({
-        sucesso: false,
-        mensagem: "Usuário ou senha inválidos."
-      });
-    }
-
-    res.json(encontrado);
-  } catch (erro) {
-    console.error(erro);
-
-    res.status(500).json({
-      mensagem: "Erro ao realizar login."
-    });
-  }
-});
-
-// =====================================================
-// CADASTRO DE PACIENTES
-// =====================================================
-
-app.post("/atendimento", (req, res) => {
-  try {
-    const db = readDB();
-
-    const paciente = {
-      id: Date.now(),
-      nome: req.body.nome || req.body.nomeCompleto,
-      cpf: req.body.cpf || "",
-      mae: req.body.mae || "",
-      nascimento: req.body.nascimento || "",
-      estadoCivil: req.body.estadoCivil || "",
-      telefone: req.body.telefone || "",
-      email: req.body.email || "",
-      emergencia: req.body.emergencia || "",
-      endereco: req.body.endereco || "",
-      tipo: req.body.tipo || "",
-      status: "triagem",
-      createdAt: new Date().toISOString()
-    };
-
-    if (!paciente.nome) {
-      return res.status(400).json({
-        sucesso: false,
-        mensagem: "Informe o nome do paciente."
-      });
-    }
-
-    db.pacientes.push(paciente);
-    writeDB(db);
-
-    res.status(201).json({
-      sucesso: true,
-      mensagem: "Paciente cadastrado com sucesso.",
-      paciente
-    });
-  } catch (erro) {
-    console.error(erro);
-
-    res.status(500).json({
-      sucesso: false,
-      mensagem: "Erro ao cadastrar paciente."
-    });
-  }
-});  // =====================================================
-// LISTAR E BUSCAR PACIENTES
-// =====================================================
-
-app.get("/pacientes", (req, res) => {
-  try {
-    const db = readDB();
-    const busca = normalizarTexto(req.query.busca);
-
-    let pacientes = db.pacientes;
-
-    if (busca) {
-      pacientes = pacientes.filter(p =>
-        normalizarTexto(p.nome).includes(busca) ||
-        normalizarTexto(p.cpf).includes(busca) ||
-        String(p.id).includes(busca)
-      );
-    }
-
-    res.json(pacientes);
-  } catch (erro) {
-    console.error(erro);
-    res.status(500).json({
-      mensagem: "Erro ao buscar pacientes."
-    });
-  }
-});
-
-// =====================================================
-// ANALISAR TRIAGEM — NÃO SALVA A TRIAGEM
-// =====================================================
-
-app.post("/triagem/analisar", (req, res) => {
-  try {
-    const dados = req.body;
+    const dados = req.body || {};
 
     if (!dados.nome || !dados.sintoma) {
       return res.status(400).json({
+        sucesso: false,
         mensagem: "Informe o nome e o sintoma do paciente."
       });
     }
@@ -689,13 +338,15 @@ app.post("/triagem/analisar", (req, res) => {
       risco: resultado.risco,
       motivo: resultado.motivo,
       tipo: "apoio_automatizado",
-      aviso: "Sugestão automatizada. A equipe clínica deve validar a prioridade."
+      aviso:
+        "Sugestão automatizada. A equipe clínica deve validar a prioridade."
     });
   } catch (erro) {
-    console.error("Erro na análise da triagem:", erro);
+    console.error("Erro ao analisar triagem:", erro);
 
     res.status(500).json({
-      mensagem: "Não foi possível analisar os dados da triagem."
+      sucesso: false,
+      mensagem: "Não foi possível analisar a triagem."
     });
   }
 });
@@ -707,24 +358,16 @@ app.post("/triagem/analisar", (req, res) => {
 app.post("/triagem", (req, res) => {
   try {
     const db = readDB();
-    const dados = req.body;
+    const dados = req.body || {};
 
     if (!dados.nome || !dados.sintoma) {
       return res.status(400).json({
+        sucesso: false,
         mensagem: "Informe o nome e o sintoma do paciente."
       });
     }
 
-    const dadosClinicos = {
-      ...dados,
-      temperatura: numeroOuNulo(dados.temperatura),
-      pulso: numeroOuNulo(dados.pulso),
-      saturacao: numeroOuNulo(dados.saturacao),
-      respiracao: numeroOuNulo(dados.respiracao)
-    };
-
-    // O servidor calcula o risco novamente.
-    const resultado = analisarRisco(dadosClinicos);
+    const nomeInformado = String(dados.nome).trim();
 
     let paciente = null;
 
@@ -735,12 +378,14 @@ app.post("/triagem", (req, res) => {
 
       if (!paciente) {
         return res.status(404).json({
+          sucesso: false,
           mensagem: "Paciente cadastrado não encontrado."
         });
       }
     } else {
       const encontrados = db.pacientes.filter(p =>
-        normalizarTexto(p.nome) === normalizarTexto(dados.nome) &&
+        normalizarTexto(p.nome) ===
+          normalizarTexto(nomeInformado) &&
         p.status === "triagem"
       );
 
@@ -748,19 +393,28 @@ app.post("/triagem", (req, res) => {
         paciente = encontrados[0];
       } else if (encontrados.length > 1) {
         return res.status(409).json({
-          mensagem: "Existem pacientes com esse nome. Selecione o cadastro correto."
+          sucesso: false,
+          mensagem:
+            "Existem pacientes com esse nome. Selecione o cadastro correto."
         });
       }
     }
 
-    const nomePaciente = paciente
-      ? paciente.nome
-      : dadosClinicos.nome;
+    const dadosClinicos = {
+      ...dados,
+      temperatura: numeroOuNulo(dados.temperatura),
+      pulso: numeroOuNulo(dados.pulso),
+      saturacao: numeroOuNulo(dados.saturacao),
+      respiracao: numeroOuNulo(dados.respiracao)
+    };
+
+    // O risco é calculado novamente no servidor.
+    const resultado = analisarRisco(dadosClinicos);
 
     const triagem = {
       id: gerarId("TRI"),
       pacienteId: paciente ? paciente.id : null,
-      nome: nomePaciente,
+      nome: paciente ? paciente.nome : nomeInformado,
       sintoma: dadosClinicos.sintoma,
       temperatura: dadosClinicos.temperatura,
       pulso: dadosClinicos.pulso,
@@ -779,26 +433,29 @@ app.post("/triagem", (req, res) => {
 
     if (paciente) {
       paciente.status = "aguardando_medico";
+      paciente.risco = triagem.risco;
+      paciente.triagemId = triagem.id;
     }
 
     writeDB(db);
 
     res.status(201).json({
       sucesso: true,
-      mensagem: "Triagem registrada.",
+      mensagem: "Triagem registrada com sucesso.",
       triagem
     });
   } catch (erro) {
     console.error("Erro ao registrar triagem:", erro);
 
     res.status(500).json({
+      sucesso: false,
       mensagem: "Erro ao registrar triagem."
     });
   }
 });
 
 // =====================================================
-// LISTAR TRIAGENS PENDENTES POR PRIORIDADE
+// LISTAR TRIAGENS POR PRIORIDADE
 // =====================================================
 
 app.get("/triagens", (req, res) => {
@@ -813,7 +470,7 @@ app.get("/triagens", (req, res) => {
       azul: 5
     };
 
-    const triagens = db.triagens
+    const triagens = [...db.triagens]
       .filter(t => t.status === "aguardando_medico")
       .sort((a, b) => {
         const prioridadeA = ordem[a.risco] || 99;
@@ -823,12 +480,13 @@ app.get("/triagens", (req, res) => {
           return prioridadeA - prioridadeB;
         }
 
-        return new Date(a.createdAt) - new Date(b.createdAt);
+        return new Date(a.createdAt || 0) -
+          new Date(b.createdAt || 0);
       });
 
     res.json(triagens);
   } catch (erro) {
-    console.error(erro);
+    console.error("Erro ao listar triagens:", erro);
 
     res.status(500).json({
       mensagem: "Erro ao listar triagens."
@@ -837,7 +495,7 @@ app.get("/triagens", (req, res) => {
 });
 
 // =====================================================
-// CHAMADA DE PACIENTE NA TV
+// CHAMAR PACIENTE NA TV
 // =====================================================
 
 app.post("/tv/chamar", (req, res) => {
@@ -866,7 +524,7 @@ app.post("/tv/chamar", (req, res) => {
       chamada
     });
   } catch (erro) {
-    console.error(erro);
+    console.error("Erro ao chamar paciente:", erro);
 
     res.status(500).json({
       mensagem: "Erro ao chamar paciente."
@@ -887,7 +545,7 @@ app.get("/tv/chamada", (req, res) => {
       historico: db.tv_historico
     });
   } catch (erro) {
-    console.error(erro);
+    console.error("Erro ao consultar TV:", erro);
 
     res.status(500).json({
       mensagem: "Erro ao consultar chamadas."
@@ -948,7 +606,7 @@ app.post("/consulta", (req, res) => {
       consulta
     });
   } catch (erro) {
-    console.error(erro);
+    console.error("Erro ao registrar consulta:", erro);
 
     res.status(500).json({
       mensagem: "Erro ao registrar consulta."
@@ -965,14 +623,16 @@ app.get("/medicacoes", (req, res) => {
     const db = readDB();
     res.json(db.consultas);
   } catch (erro) {
-    console.error(erro);
+    console.error("Erro ao listar medicações:", erro);
 
     res.status(500).json({
       mensagem: "Erro ao listar medicações."
     });
   }
-}); // =====================================================
-// FUNÇÕES PARA O PDF
+});
+
+// =====================================================
+// FUNÇÕES PARA GERAR PDF DA ALTA
 // =====================================================
 
 function escaparPDF(texto) {
@@ -1009,10 +669,6 @@ function quebrarTexto(texto, tamanho = 85) {
   return linhas;
 }
 
-// =====================================================
-// GERAR TERMO DE ALTA EM PDF
-// =====================================================
-
 function gerarPDFAlta(alta) {
   const objetos = [];
 
@@ -1022,10 +678,10 @@ function gerarPDFAlta(alta) {
   }
 
   const linhas = [
-    { texto: "MEDCORE", tamanho: 22, bold: true, centralizado: true },
-    { texto: "SISTEMA HOSPITALAR", tamanho: 10, centralizado: true },
+    { texto: "MEDCORE", tamanho: 22, bold: true },
+    { texto: "SISTEMA HOSPITALAR", tamanho: 10 },
     { texto: "", tamanho: 10 },
-    { texto: "TERMO DE ALTA MEDICA", tamanho: 16, bold: true, centralizado: true },
+    { texto: "TERMO DE ALTA MEDICA", tamanho: 16, bold: true },
     { texto: "", tamanho: 10 },
     { texto: "DADOS DO PACIENTE", tamanho: 12, bold: true },
     { texto: "Nome completo: " + (alta.paciente || "Nao informado"), tamanho: 10 },
@@ -1058,23 +714,17 @@ function gerarPDFAlta(alta) {
     for (const parte of partes) {
       const texto = escaparPDF(parte);
       const tamanho = item.tamanho || 10;
-      const x = item.centralizado ? 150 : 50;
 
       conteudo +=
         `BT /${item.bold ? "Helvetica-Bold" : "Helvetica"} ` +
-        `${tamanho} Tf ${x} ${y} Td (${texto}) Tj ET\n`;
+        `${tamanho} Tf 50 ${y} Td (${texto}) Tj ET\n`;
 
       y -= tamanho >= 16 ? 26 : tamanho >= 12 ? 20 : 16;
-
-      if (y < 50) y = 50;
     }
   }
 
   adicionarObjeto("<< /Type /Catalog /Pages 2 0 R >>");
-
-  adicionarObjeto(
-    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>"
-  );
+  adicionarObjeto("<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
 
   adicionarObjeto(
     "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] " +
@@ -1165,7 +815,8 @@ app.post("/alta-paciente", (req, res) => {
 
     if (!paciente && nomePaciente) {
       paciente = db.pacientes.slice().reverse().find(p =>
-        normalizarTexto(p.nome) === normalizarTexto(nomePaciente)
+        normalizarTexto(p.nome) ===
+        normalizarTexto(nomePaciente)
       );
     }
 
@@ -1239,9 +890,13 @@ app.post("/alta-paciente", (req, res) => {
     db.triagens = db.triagens.filter(t => {
       const corresponde = t.pacienteId
         ? String(t.pacienteId) === String(paciente.id)
-        : normalizarTexto(t.nome) === normalizarTexto(paciente.nome);
+        : normalizarTexto(t.nome) ===
+          normalizarTexto(paciente.nome);
 
-      return !(corresponde && t.status === "aguardando_medico");
+      return !(
+        corresponde &&
+        t.status === "aguardando_medico"
+      );
     });
 
     writeDB(db);
@@ -1270,7 +925,8 @@ app.get("/altas", (req, res) => {
     const db = readDB();
     res.json(db.altas.slice().reverse());
   } catch (erro) {
-    console.error(erro);
+    console.error("Erro ao listar altas:", erro);
+
     res.status(500).json({
       mensagem: "Erro ao listar altas."
     });
@@ -1297,7 +953,8 @@ app.get("/alta/:id", (req, res) => {
 
     res.json(alta);
   } catch (erro) {
-    console.error(erro);
+    console.error("Erro ao buscar alta:", erro);
+
     res.status(500).json({
       mensagem: "Erro ao buscar alta."
     });
