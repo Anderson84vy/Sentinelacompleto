@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+<!-- navbar -->
+ <header class="navbar">
+<div class="nav-brand">
+    <div class="logo-icon">📦</div>
+<div>
+<h1>Hospital Pro -- Almoxerifado</h1>
+<span>Gestão de Entrada e Controle de Estoque</span>
+</div>
+</div>
+<div class="nav-user">
+    <span class="user-pill" id="nomeUsuario">📦 Almoxerifado</span>
+</div>
+ </header>
+
+ <div class="container">
+
+<!-- ALERTA -->
+<div class="alerta-estoque" id="alertaEstoque"
+    style="display:none">
+    <strong>Atenção:</strong> <span id="alertaTexto">
+
+    </span>
+</div>
+ </div>
+
+<!-- STATS -->
+ <div class="stats-bar">
+<div class="stat-card">
+    <div class="stat-icon purple">📦</div>
+<div>
+    <div class="stat-value" id="statItens">--</div>
+    <div class="stat-label">tipos Cadastrados</div>
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon green">🟢</div>
+<div>
+    <div class="stat-value" id="statOk">--</div>
+    <div class="stat-label">Estoque Normal</div>
+</div>
+</div>
+
+<div class="stat-card"></div>
+<div class="stat-icon orange">⚠️</div>
+ 
+<div class="stat-value" id="statBaixo">-</div>
+<div class="stat-label">Estoque Baixo (MENOR QUE10)</div>
+</div>
+</div>
+<div class="stat-card">
+
+    <div class="stat-icon red">🚫</div>
+    <div>
+        <div class="stat-value" id="statZerado">--</div>
+        <div class="stat-label">Zerados / Esgotados</div>
+    </div>
+</div>
+</div>
+
+<!-- MAIN GRID -->
+ <div class="main-grid">
+
+<!-- --- COLUNA ESQUERDA: FORMULÁRIO ENTRADA --- -->
+<div class="card">
+    <div class="card-header">
+        <h2>📥 Entrada de Medicamentos</h2>
+    </div>
+
+    <div class="card-body">
+
+
+        <!-- Tabs: Novo ou Repor -->
+<div class="entrada-tabs">
+    <button class="tab-btn active" id="tabNovo" 
+    onclick="setTab('novo')">➕Novo
+    Medicamento</button>
+    <button class="tab-btn" id="tabRepor" onclick="setTab('repor')">📦 Repor Existente</button>
+</div>
+    
+      <!-- PAINEL: Cadastrar Novo -->
+       <div id="painelNovo">
+        <div class="form-group">
+            <label for="emNome">Nome do Medicamento</label>
+            <input type="text" id="emNome" class="form-control"
+            placeholder="Ex: Paracetamol 750mg"
+            autocomplete="off">
+        </div>
+
+<div class="form-group">
+    <label for="emQtd">Quantidade
+        <small>(unidades a adicionar)</small></label>
+        <input type="number" id="emQtd" class="form-control"
+        value="10" min="1">
+</div>
+
+<div class="form-group">
+    <label for="emUnidade">Tipo de Unidade</label>
+    <select id="emUnidade" class="form-control">
+        <option value="comprimidos">Comprimentos</option>
+        <option value="cápsulas">Cápsulas</option>
+        <option value="frascos">Frascos</option>
+        <option value="ampolas">Ampolas</option>
+        <option value="saches">Saches</option>
+        <option value="Unidades">Unidades</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="emCategoria">Categoria
+        Farmacológica</label>
+        <select id="emCategoria" class="form-control">
+            <option value="Analgésico/Antipirético">
+                Analgésico /
+                Antipirético</option>
+                <option value="Antibiótico">Antibiótico</option>
+                <option value="Anti-inflamatório">Anti-inflamatório</option>
+                <option value="Antialérgico">Antialérgico</option>
+                <option value="protetor gástrico">Protetor 
+                    gástrico</option>
+                    <option value="antiespamódico">
+                        Antiespamódico</option>
+                        <option value="Antiemético">Antiemético</option>
+                        <option value="Solução">Solução</option>
+                        <option value="Vitamina/Suplemento">Vitamina / 
+                            Suplemento</option>
+                            <option value="Geral">Geral</option>
+        </select>
+        
+<button class="btn-full btn-purple" onclick="darEntrada()">
+                    📥 Registrar Entrada no Estoque
+                </button>
+            </div>
+
+            <!-- PAINEL: Repor Existente -->
+             <div class="form-group">
+                <label for="selReporMed">Selecionar Medicamento
+
+                </label>
+
+                <select id="selReported" class="form-control">
+                    <option value="">-- Selecione --</option>
+                </select>
+             </div>
+             <div class="form-group">
+                <label for="reporQtd">Quantidade a 
+                    Adicionar</label>
+                    <input type="text" id="reporObs"
+                    class="form-control" placeholder="10" min="1">
+             </div>
+
+<div class="form-group">
+    <label for="reporObs">Observação <small>
+        (opcional)</small></label>
+        <input type="text" id="reporObs"
+        class="form-control" placeholder="Ex: Nota fiscal NF -001">
+</div>
+<button class="btn-full btn-purple"
+onclick="reporEstoque()">
+➕Adicionar ao Estoque Existente
+</button>
+        </div>
+     </div>
+
+<!-- Histórico de Entradas -->
+  <div class="card" style="margin-top:20px">
+    <div class="card-header">
+        <h2>📋Últimas Entradas Registradas</h2>
+        <button class="btn-sm btn-secondary"
+        onclick="carregarHistoricoEntradas()">🔄️</button>
+    <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <p>Nenhuma entrada registrada ainda.</p>
+    </div>
+  </div>
+ </div>
+</div>
+
+<!-- Coluna Direita: Estoque Atual -->
+ <div>
+    <div class="card">
+        <div class="card-header">
+            <h2>📊 Estoque atual  de Medicamnetos</h2>
+            <button class="btn-sm btn-secondary" 
+            onclick="carregarEstoque()">🔄️ Atualizar</button>
+        </div>
+        <div class="card-body">
+
+            <div class="search-bar">
+                <input type="text" class="search-input"
+                id="buscaMed" placeholder="🔍 Buscar medicamneto..."
+                oninput="filtrarTabela()">
+            </div>
+
+<div class="filter-chips" id="filterchips">
+    <span class="chip active" onclick="setFiltro
+    ('todos', this)">Todos</span>
+</div>
+
+<div style="overflow-x: auto;">
+    <table class="estoque-table">
+        <thead>
+            <tr>
+                <th>Medicamento</th>
+                <th>Categoria</th>
+                <th>Disponível</th>
+                <th>Unidade</th>
+                <th style="text-align: right;">Ações</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+        </div>
+    </div>
+ </div>
+   
+
+</div>
+
+        
+</div>
+</div>
+</div>
+</div>
+ </div>
+
+
+</body>
+</html>
